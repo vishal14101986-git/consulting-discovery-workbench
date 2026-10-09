@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OpenShift Discovery Workbench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F1EFEE; --surface:#FFFFFF; --surface-2:#F8F6F5; --ink:#1E1A19; --ink-2:#4D4644; --ink-3:#756D6A;
+  --line:#DCD6D4; --line-2:#EAE5E3; --accent:#A3222A; --accent-ink:#FFFFFF; --accent-soft:#F6DEDE;
+  --warn:#A94E08; --warn-soft:#FBE8D6; --bad:#B3261E; --bad-soft:#F9DEDB; --good:#2B7A30; --good-soft:#DDF0DE;
+  --p-plat:#A3222A; --p-apps:#3553A0; --p-sec:#6A41A6; --p-ops:#0E6B63; --p-virt:#8E6300; --p-ai:#B03A7A;
+  --shadow:0 1px 2px rgba(30,26,25,.06),0 4px 16px rgba(30,26,25,.05);
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121010; --surface:#1B1817; --surface-2:#221E1D; --ink:#EDE7E5; --ink-2:#BFB6B3; --ink-3:#958C89;
+    --line:#3A3331; --line-2:#2B2625; --accent:#F2878B; --accent-ink:#2A0809; --accent-soft:#3A1A1B;
+    --warn:#F0A35E; --warn-soft:#3A2616; --bad:#F2877F; --bad-soft:#3B1C1A; --good:#7FCB84; --good-soft:#18301A;
+    --p-plat:#F2878B; --p-apps:#90A9EA; --p-sec:#B9A0EA; --p-ops:#4FC2B5; --p-virt:#E4B44A; --p-ai:#E88CC0;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121010; --surface:#1B1817; --surface-2:#221E1D; --ink:#EDE7E5; --ink-2:#BFB6B3; --ink-3:#958C89;
+  --line:#3A3331; --line-2:#2B2625; --accent:#F2878B; --accent-ink:#2A0809; --accent-soft:#3A1A1B;
+  --warn:#F0A35E; --warn-soft:#3A2616; --bad:#F2877F; --bad-soft:#3B1C1A; --good:#7FCB84; --good-soft:#18301A;
+  --p-plat:#F2878B; --p-apps:#90A9EA; --p-sec:#B9A0EA; --p-ops:#4FC2B5; --p-virt:#E4B44A; --p-ai:#E88CC0;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);margin:0}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:18px 60px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-block:6px 18px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:12px}
+.mark{width:34px;height:34px;flex:none}
+.brand h1{font-size:20px;line-height:1.1}
+.brand small{display:block;font:500 11px/1.4 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.meter{display:flex;align-items:center;gap:10px;font:500 12px var(--f-mono);color:var(--ink-2)}
+.meter .track{width:140px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.meter .fill{height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
+.layout{display:grid;grid-template-columns:232px minmax(0,1fr);gap:28px;align-items:start}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);display:flex;flex-direction:column;gap:2px}
+.rail .cust{padding:0 10px 12px;font-size:13px;color:var(--ink-3)}
+.rail .cust b{display:block;color:var(--ink);font:600 15px/1.3 var(--f-body)}
+.step{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:0;background:none;text-align:left;cursor:pointer;color:var(--ink-2)}
+.step:hover{background:var(--surface-2)}
+.step[aria-current="step"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.step .n{font:500 11px var(--f-mono);color:var(--ink-3);text-align:center}
+.step .dot{width:10px;height:10px;border-radius:50%;justify-self:center}
+.step .lbl{font-size:14px;font-weight:500;line-height:1.25}
+.step .cnt{font:500 11px var(--f-mono);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.step .cnt.done{color:var(--good)}
+.rail hr{border:0;border-top:1px solid var(--line);margin:8px 10px}
+main{min-width:0}
+.banner{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:14px}
+.banner b{color:var(--warn)}
+.head{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.eyebrow{font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.eyebrow .sw{width:8px;height:8px;border-radius:2px}
+.head h2{font-size:30px;line-height:1.1}
+.head p{margin:0;color:var(--ink-2);max-width:68ch}
+.panel{background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:20px;box-shadow:var(--shadow)}
+.stack{display:flex;flex-direction:column;gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>label,.field>.lab{font-size:13px;font-weight:600;color:var(--ink-2)}
+.field .hint{font-size:12.5px;color:var(--ink-3)}
+input[type=text],input[type=date],select,textarea{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+textarea{min-height:84px;resize:vertical;line-height:1.5}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:6px 12px;font-size:13.5px;cursor:pointer;color:var(--ink-2);line-height:1.2}
+.chip:hover{border-color:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.rank{display:inline-flex;gap:6px;align-items:center}
+.chip .rk{font:500 11px var(--f-mono);opacity:.85}
+.chip.dim{opacity:.45}
+.q{display:flex;flex-direction:column;gap:12px;padding-block:18px;border-top:1px solid var(--line-2)}
+.q:first-child{border-top:0;padding-top:4px}
+.qtop{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.qtop h3{font:600 16px/1.3 var(--f-body);letter-spacing:0}
+.qid{font:500 11px var(--f-mono);color:var(--ink-3)}
+.ask{margin:0;padding-left:12px;border-left:3px solid var(--line);color:var(--ink-2);font-size:14.5px}
+.ask::before{content:"Ask  ";font:600 10.5px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.sc{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:8px 4px;cursor:pointer;font:600 15px var(--f-mono);color:var(--ink-2)}
+.sc:hover{border-color:var(--ink-3)}
+.sc[aria-pressed="true"]{color:#fff;border-color:transparent}
+.sc[aria-pressed="true"][data-v="1"],.sc[aria-pressed="true"][data-v="2"]{background:var(--bad)}
+.sc[aria-pressed="true"][data-v="3"]{background:var(--warn)}
+.sc[aria-pressed="true"][data-v="4"],.sc[aria-pressed="true"][data-v="5"]{background:var(--good)}
+:root[data-theme="dark"] .sc[aria-pressed="true"]{color:#121010}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sc[aria-pressed="true"]{color:#121010}}
+.anchors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;font-size:12.5px;color:var(--ink-3);line-height:1.4}
+.anchors span b{font:600 11px var(--f-mono);color:var(--ink-2);margin-right:4px}
+.anchors span:nth-child(2){text-align:center}.anchors span:nth-child(3){text-align:right}
+.pillhead{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.scorebig{display:flex;align-items:baseline;gap:8px}
+.scorebig b{font:700 34px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.scorebig span{font:500 12px var(--f-mono);color:var(--ink-3)}
+.tag{display:inline-block;font:500 11px/1 var(--f-mono);letter-spacing:.05em;text-transform:uppercase;padding:5px 8px;border-radius:5px}
+.lv-1{background:var(--bad-soft);color:var(--bad)}.lv-2{background:var(--warn-soft);color:var(--warn)}.lv-3{background:var(--accent-soft);color:var(--accent)}.lv-4{background:var(--good-soft);color:var(--good)}.lv-0{background:var(--line-2);color:var(--ink-3)}
+.navrow{display:flex;justify-content:space-between;gap:10px;margin-top:22px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 16px;cursor:pointer;font-weight:500;font-size:14px}
+.btn:hover{border-color:var(--ink-3)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{filter:brightness(1.07)}
+.btn.sm{padding:6px 11px;font-size:13px}
+.btn.danger{color:var(--bad)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.ucform{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.2fr) minmax(0,.8fr) minmax(0,.8fr) auto;gap:10px;align-items:end}
+.tpls{display:flex;flex-direction:column;gap:8px}
+.tpl{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:start;border:1px solid var(--line-2);background:var(--surface-2);border-radius:8px;padding:10px 12px;text-align:left;cursor:pointer}
+.tpl:hover{border-color:var(--ink-3)}
+.tpl .sw{width:10px;height:10px;border-radius:2px;margin-top:5px}
+.tpl b{font-weight:600;font-size:14px;display:block}
+.tpl span{font-size:12.5px;color:var(--ink-3)}
+.tpl i{font:500 11px var(--f-mono);font-style:normal;color:var(--accent);white-space:nowrap}
+.tpl[disabled]{opacity:.5;cursor:default}
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font:500 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding:8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);white-space:nowrap}
+td.nw,th{white-space:nowrap}
+td select{padding:5px 6px;width:auto}
+.idx{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;font:600 11px var(--f-mono);color:#fff}
+:root[data-theme="dark"] .idx{color:#121010}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .idx{color:#121010}}
+.matrix svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+.bars{display:flex;flex-direction:column;gap:14px}
+.bar{display:grid;grid-template-columns:130px minmax(0,1fr) 44px;gap:12px;align-items:center}
+.bar .nm{font-size:14px;font-weight:500}
+.bar .tr{position:relative;height:14px;background:var(--surface-2);border-radius:4px;border:1px solid var(--line-2)}
+.bar .fl{position:absolute;inset:0 auto 0 0;border-radius:3px}
+.bar .v{font:600 14px var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.axis{display:grid;grid-template-columns:130px minmax(0,1fr) 44px;gap:12px}
+.axis .ticks{position:relative;height:16px;font:500 10.5px var(--f-mono);color:var(--ink-3)}
+.axis .ticks span{position:absolute;transform:translateX(-50%)}
+.axis .ticks span:last-child{transform:translateX(-100%)}
+.recs{display:flex;flex-direction:column;gap:0}
+.rec{display:grid;grid-template-columns:4px minmax(0,1fr);gap:14px;padding-block:14px;border-top:1px solid var(--line-2)}
+.rec:first-child{border-top:0}
+.rec .stripe{border-radius:2px}
+.rec h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
+.rec p{margin:0 0 8px;color:var(--ink-2);font-size:14px}
+.prod{display:flex;flex-wrap:wrap;gap:6px}
+.prod span{font:500 11.5px var(--f-mono);background:var(--surface-2);border:1px solid var(--line-2);border-radius:5px;padding:3px 7px;color:var(--ink-2)}
+.motions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.motion{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--surface-2)}
+.motion b{display:block;font-size:14.5px;margin-bottom:4px}
+.motion span{font-size:13.5px;color:var(--ink-2)}
+.plan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.plan div{border-top:3px solid var(--accent);padding-top:10px}
+.plan h4{margin:0 0 6px;font:600 12px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.plan ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px}
+.kv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kv div{font-size:13px;color:var(--ink-3)}
+.kv b{display:block;color:var(--ink);font-size:14.5px;font-weight:600}
+.muted{color:var(--ink-3);font-size:13.5px}
+.empty{padding:22px;text-align:center;color:var(--ink-3);border:1px dashed var(--line);border-radius:10px;font-size:14px}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:14px;box-shadow:var(--shadow);z-index:20}
+.confirm{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--bad-soft);border-radius:8px;padding:10px 12px;font-size:14px}
+h3.sec{font-size:18px;margin-bottom:12px}
+.sectitle{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.sectitle h3{font-size:18px}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr);gap:16px}
+  .rail{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:6px;margin-inline:-4px}
+  .rail .cust,.rail hr{display:none}
+  .step{grid-template-columns:auto auto;white-space:nowrap;flex:none}
+  .step .cnt{display:none}
+  .split,.motions{grid-template-columns:minmax(0,1fr)}
+  .kv{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:16px}
+  .grid2,.plan{grid-template-columns:minmax(0,1fr)}
+  .ucform{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .ucform .f-name{grid-column:1/-1}
+  .head h2{font-size:25px}
+  .bar,.axis{grid-template-columns:92px minmax(0,1fr) 36px;gap:8px}
+  .anchors{grid-template-columns:minmax(0,1fr)}
+  .anchors span:nth-child(n){text-align:left}
+  .meter .track{width:90px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 34 34" aria-hidden="true">
+        <rect x="1" y="1" width="9.5" height="15" rx="2.5" fill="var(--p-plat)"/>
+        <rect x="12.25" y="1" width="9.5" height="15" rx="2.5" fill="var(--p-apps)"/>
+        <rect x="23.5" y="1" width="9.5" height="15" rx="2.5" fill="var(--p-sec)"/>
+        <rect x="1" y="18" width="9.5" height="15" rx="2.5" fill="var(--p-ops)"/>
+        <rect x="12.25" y="18" width="9.5" height="15" rx="2.5" fill="var(--p-virt)"/>
+        <rect x="23.5" y="18" width="9.5" height="15" rx="2.5" fill="var(--p-ai)"/>
+      </svg>
+      <div><small>Consulting · Red Hat OpenShift</small><h1>OpenShift Discovery Workbench</h1></div>
+    </div>
+    <div class="meter" id="meter"></div>
+  </header>
+  <div class="layout">
+    <nav class="rail" id="rail" aria-label="Discovery stages"></nav>
+    <main id="main"></main>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Content model ---------- */
+const PILLARS = [
+ {id:"plat", name:"Platform foundation", short:"Platform", color:"--p-plat",
+  blurb:"Cluster strategy, deployment footprint, networking, storage and lifecycle: the foundation every workload on OpenShift depends on.",
+  signals:["Clusters out of support","Kubernetes sprawl across teams","Datacentre refresh or exit","Hybrid or multi-cloud mandate","Edge or remote sites","Disconnected / air-gapped requirement"],
+  qs:[
+   {id:"pl1",t:"Container platform strategy",ask:"Do you run OpenShift or other Kubernetes today? How many clusters, and who owns the container platform strategy?",l1:"No container platform",l3:"A few clusters, per-team decisions",l5:"Platform strategy with a product owner and roadmap",rec:"Run an OpenShift platform design workshop to agree target topology, cluster tiers, tenancy and ownership.",w:["OpenShift Container Platform","Validated patterns","Platform design workshop"]},
+   {id:"pl2",t:"Deployment footprint & topology",ask:"Where would clusters run: bare metal, vSphere, public cloud or edge? Is a managed service an option?",l1:"Undecided, no landing zone",l3:"Primary site chosen, ad hoc installs",l5:"Standard topology per tier, managed options assessed",rec:"Pick a reference topology per environment and decide between self-managed and managed OpenShift on cloud.",w:["Assisted / agent-based installer","Red Hat OpenShift Service on AWS","Azure Red Hat OpenShift"]},
+   {id:"pl3",t:"Networking & ingress",ask:"How will traffic reach apps and backends: load balancers, DNS, egress control, network policy?",l1:"Unplanned, firewall tickets per app",l3:"Ingress designed, few network policies",l5:"Default-deny policy, egress IPs, automated DNS and LB",rec:"Design network patterns up front: ingress sharding, default-deny network policies and egress IPs for firewalled backends.",w:["OVN-Kubernetes","MetalLB","Gateway API"]},
+   {id:"pl4",t:"Storage for stateful workloads",ask:"What storage would back stateful apps? Does it support dynamic provisioning, snapshots and replication?",l1:"No CSI, manual NFS",l3:"CSI for block, gaps for file and object",l5:"Block, file and object with snapshots and DR",rec:"Standardise storage classes; evaluate OpenShift Data Foundation where existing arrays lack CSI, snapshots or replication.",w:["OpenShift Data Foundation","Certified CSI drivers","Volume snapshots"]},
+   {id:"pl5",t:"Lifecycle & upgrades",ask:"How current are the clusters, and how are upgrades planned, tested and rolled out?",l1:"Behind support, upgrades avoided",l3:"Manual upgrades within support",l5:"EUS-aware cadence, staged and tested upgrades",rec:"Set an upgrade policy aligned to update channels and EUS releases, with a staging cluster and pre-upgrade health checks.",w:["OpenShift update channels","EUS releases","Red Hat Insights"]}
+  ]},
+ {id:"apps", name:"Apps & developer experience", short:"Apps", color:"--p-apps",
+  blurb:"Which applications move to containers, how they are built and released, and how quickly developers can get to production.",
+  signals:["Commercial app-server licence renewal","Monthly or slower releases","Developers waiting weeks for environments","Java or .NET upgrade backlog","Microservices programme stalled"],
+  qs:[
+   {id:"ap1",t:"Portfolio & containerisation fit",ask:"How many apps are candidates for OpenShift, and has anyone assessed their fit (rehost, replatform, refactor, retain)?",l1:"No inventory",l3:"Inventory, no fit analysis",l5:"Wave plan backed by code analysis",rec:"Run Migration Toolkit for Applications analysis over priority repositories to size effort and shape migration waves.",w:["Migration Toolkit for Applications","6R assessment","Wave planning"]},
+   {id:"ap2",t:"Runtimes & frameworks",ask:"Which runtimes dominate: WebLogic, WebSphere, JBoss, Spring, .NET Framework, Node? Which JDK versions?",l1:"Heavy app servers, old JDKs",l3:"Mixed, some cloud-ready runtimes",l5:"Container-native runtimes standardised",rec:"Target lightweight runtimes (Quarkus, Spring Boot, JBoss EAP on OpenShift) and plan app-server exits against licence dates.",w:["Red Hat build of Quarkus","JBoss EAP","Red Hat Runtimes"]},
+   {id:"ap3",t:"CI/CD & GitOps",ask:"How does code reach production, and is application and cluster configuration held in Git?",l1:"Manual deploys, config drift",l3:"CI pipelines, scripted deploys",l5:"Pipelines plus GitOps for apps and clusters",rec:"Adopt GitOps with Argo CD for app and cluster configuration, with Tekton or existing CI producing signed images.",w:["OpenShift GitOps","OpenShift Pipelines","Helm / Kustomize"]},
+   {id:"ap4",t:"Developer self-service",ask:"How long does a team wait for a new namespace, environment or pipeline?",l1:"Weeks, via tickets",l3:"Templates, still gated",l5:"Golden paths in a developer portal",rec:"Stand up Red Hat Developer Hub with two or three golden-path templates for the most common app types.",w:["Red Hat Developer Hub","OpenShift Dev Spaces","Software templates"]},
+   {id:"ap5",t:"Integration & APIs",ask:"How do services talk to each other and to legacy systems: point-to-point, ESB, messaging or managed APIs?",l1:"Point-to-point",l3:"Some APIs, legacy ESB",l5:"Managed APIs, event streaming, mesh where needed",rec:"Introduce managed APIs and event streaming for the first wave; add service mesh only where mTLS and traffic control are needed.",w:["Red Hat 3scale API Management","Streams for Apache Kafka","OpenShift Service Mesh"]}
+  ]},
+ {id:"sec", name:"Security & compliance", short:"Security", color:"--p-sec",
+  blurb:"Identity, software supply chain, runtime protection and the compliance evidence regulators and auditors will ask for.",
+  signals:["Audit or regulator findings","Recent security incident","Zero-trust programme","Software supply chain concerns","Sovereignty or data residency rules"],
+  qs:[
+   {id:"se1",t:"Identity & access",ask:"How do people and pipelines authenticate to clusters, and how is RBAC managed?",l1:"Shared admin credentials",l3:"SSO, RBAC set by hand per cluster",l5:"SSO, group-synced RBAC as code, least privilege",rec:"Integrate cluster OAuth with the corporate identity provider, sync groups, and manage RBAC through GitOps.",w:["OpenShift OAuth / OIDC","Red Hat build of Keycloak","Group sync"]},
+   {id:"se2",t:"Supply chain & image security",ask:"Where do container images come from? Are they scanned, signed and verified before they run?",l1:"Public images, no scanning",l3:"Registry scanning only",l5:"Trusted base images, signing, admission policy",rec:"Use Universal Base Images and a private registry with scanning; sign images in the pipeline and verify them at admission.",w:["Red Hat Quay","Red Hat Trusted Software Supply Chain","Universal Base Images"]},
+   {id:"se3",t:"Runtime security & posture",ask:"How would you detect a vulnerable or misbehaving container in production today?",l1:"No visibility",l3:"Vulnerability reports, no enforcement",l5:"Policy enforcement and runtime detection",rec:"Deploy Advanced Cluster Security for vulnerability management, deploy-time policy and runtime threat detection.",w:["Red Hat Advanced Cluster Security","Network policies"]},
+   {id:"se4",t:"Compliance evidence",ask:"Which standards apply (CIS, PCI DSS, ISO 27001, NIST, local regulators), and how do you evidence compliance today?",l1:"Manual audits, no baseline",l3:"Hardening docs, periodic checks",l5:"Continuous scans with automated remediation",rec:"Enable the Compliance Operator with the relevant profiles and feed scan results into audit evidence.",w:["Compliance Operator","File Integrity Operator","OpenShift Platform Plus"]},
+   {id:"se5",t:"Secrets & data protection",ask:"How are secrets, certificates and encryption keys handled for apps and clusters?",l1:"Secrets in Git or config files",l3:"Kubernetes secrets, manual rotation",l5:"External vault, automated certs, etcd encryption",rec:"Integrate an external secrets store and cert-manager, and enable etcd encryption on every cluster.",w:["External Secrets Operator","cert-manager Operator","etcd encryption"]}
+  ]},
+ {id:"ops", name:"Operations & automation", short:"Ops", color:"--p-ops",
+  blurb:"Who runs the platform, how it is observed, automated and recovered, and how a fleet of clusters stays consistent.",
+  signals:["Platform team stretched thin","Frequent manual toil","Inconsistent clusters","No tested DR","Reliance on a single engineer or partner"],
+  qs:[
+   {id:"op1",t:"Operating model & skills",ask:"Who runs the platform day to day? Is there a platform team that treats it as a product?",l1:"No clear owner",l3:"Small team, heavy partner reliance",l5:"Platform product team with SLOs and enablement",rec:"Define a platform team charter and skills plan, and pair the team with experienced consultants through the first year.",w:["Platform team charter","Red Hat Training & Certification","Red Hat Learning Subscription"]},
+   {id:"op2",t:"Observability",ask:"Can app teams see metrics, logs and traces for their own workloads, and do alerts reach the right on-call?",l1:"Cluster defaults only",l3:"Metrics and logs, no tracing",l5:"Full-stack observability with SLO alerts",rec:"Roll out user-workload monitoring, central logging and distributed tracing, wired into existing alerting.",w:["OpenShift monitoring","OpenShift Logging (Loki)","Distributed tracing (Tempo)"]},
+   {id:"op3",t:"Multi-cluster management",ask:"How are clusters provisioned, governed and kept consistent as the fleet grows?",l1:"Each cluster hand-built",l3:"Scripts, partial consistency",l5:"Hub-managed fleet with policy as code",rec:"Use Advanced Cluster Management for fleet provisioning, governance policy and observability across clusters.",w:["Red Hat Advanced Cluster Management","Hosted control planes","Policy as code"]},
+   {id:"op4",t:"Infrastructure automation",ask:"What share of infrastructure and operational tasks (DNS, firewall, CMDB, patching) is automated end to end?",l1:"Manual runbooks",l3:"Scripts per team",l5:"Enterprise automation, event-driven remediation",rec:"Adopt Ansible Automation Platform for platform integrations and event-driven remediation of common alerts.",w:["Red Hat Ansible Automation Platform","Event-Driven Ansible"]},
+   {id:"op5",t:"Backup, DR & resilience",ask:"What happens if a cluster or site is lost? Are RPO and RTO defined and tested?",l1:"No cluster or app backup",l3:"etcd backup, app restore untested",l5:"App-aware backup and tested DR per tier",rec:"Implement application-aware backup with OADP, define DR patterns per workload tier and run a restore test.",w:["OpenShift API for Data Protection","ODF Regional-DR","Advanced Cluster Management"]}
+  ]},
+ {id:"virt", name:"Virtualization", short:"Virt", color:"--p-virt",
+  blurb:"The VM estate, hypervisor licensing pressure and the path to running VMs and containers on one platform.",
+  signals:["VMware licensing change","Hypervisor renewal date set","Hardware refresh due","Two ops teams for VMs and containers"],
+  qs:[
+   {id:"vm1",t:"VM estate & renewal pressure",ask:"How many VMs run on which hypervisors, and when do licence or support renewals land?",l1:"Counts unknown",l3:"Inventory, no plan",l5:"Inventory with migration waves and dates",rec:"Collect VM inventory and dependency data, and build the business case against the renewal date.",w:["VM inventory assessment","Migration Toolkit for Virtualization"]},
+   {id:"vm2",t:"Migration readiness",ask:"Which VMs could move as-is, which need modernising, and which must stay?",l1:"Not assessed",l3:"Rough categorisation",l5:"Per-VM disposition, guest OS support checked",rec:"Classify VMs into migrate, modernise and retain; check guest OS support and run a pilot wave of 20 to 50 VMs.",w:["Migration Toolkit for Virtualization","OpenShift Virtualization"]},
+   {id:"vm3",t:"Unified VM & container operations",ask:"Would VMs and containers be run by the same team, with the same tools?",l1:"Separate silos, no plan",l3:"Interest, no design",l5:"One platform and one ops model",rec:"Design OpenShift Virtualization so VMs share networking, storage, backup and monitoring with containers.",w:["OpenShift Virtualization","OpenShift Virtualization Engine","NMState / Multus"]},
+   {id:"vm4",t:"Bare-metal capacity",ask:"Is there bare-metal capacity, storage and networking suited to running VMs on OpenShift?",l1:"None identified",l3:"Hardware available, not validated",l5:"Validated bare-metal clusters sized for VMs",rec:"Size bare-metal workers and storage for the first VM waves, including live-migration networking.",w:["Bare-metal OpenShift","OpenShift Data Foundation","Certified hardware"]}
+  ]},
+ {id:"ai", name:"AI workloads", short:"AI", color:"--p-ai",
+  blurb:"Running predictive and generative AI on the platform: use cases, model serving, accelerators and data sovereignty.",
+  signals:["Board is asking for an AI plan","Data scientists on laptops","GPUs bought, under-used","Can't send data to public AI services"],
+  qs:[
+   {id:"ai1",t:"AI use cases & sponsorship",ask:"Which AI or ML use cases are funded, and who owns the outcomes?",l1:"Ad hoc experiments",l3:"Sponsor and shortlist",l5:"Funded portfolio with KPIs",rec:"Agree two or three AI use cases with a sponsor and success measures before building platform capability.",w:["AI use-case workshop"]},
+   {id:"ai2",t:"Model lifecycle & MLOps",ask:"How are models trained, versioned, served and monitored today?",l1:"Notebooks on laptops",l3:"Shared notebooks, manual deploys",l5:"Pipelines, registry, serving and monitoring",rec:"Stand up OpenShift AI with data science pipelines, a model registry and model serving.",w:["Red Hat OpenShift AI","Model registry","KServe"]},
+   {id:"ai3",t:"Accelerators & capacity",ask:"Do you have GPUs or other accelerators, and how are they shared between teams?",l1:"None, or unmanaged",l3:"Dedicated GPUs per team",l5:"Shared, quota-managed accelerator pool",rec:"Enable GPU operators and queue-based scheduling so accelerators are shared and fully used.",w:["NVIDIA GPU Operator","Node Feature Discovery","Kueue"]},
+   {id:"ai4",t:"Generative AI & sovereignty",ask:"Are there data residency or cost reasons to run LLMs on your own infrastructure?",l1:"Not considered",l3:"Requirement known, no platform",l5:"Self-hosted LLM serving with guardrails",rec:"Serve open models such as Granite with vLLM-based inference on OpenShift AI, behind guardrails and an API gateway.",w:["Red Hat AI Inference Server","Granite models","TrustyAI guardrails"]}
+  ]}
+];
+const PMAP = Object.fromEntries(PILLARS.map(p=>[p.id,p]));
+const QMAP = {}; PILLARS.forEach(p=>p.qs.forEach(q=>{QMAP[q.id]=Object.assign({pillar:p.id},q)}));
+
+const TEMPLATES = [
+ {p:"plat",n:"Production OpenShift landing zone",d:"Reference clusters, network, storage and guardrails",v:4,f:4},
+ {p:"plat",n:"Managed OpenShift on public cloud",d:"ROSA or ARO for cloud-first workloads",v:4,f:4},
+ {p:"plat",n:"Edge sites on single-node OpenShift",d:"Small-footprint clusters for branches or plants",v:3,f:2},
+ {p:"plat",n:"Disconnected regulated cluster",d:"Air-gapped install with mirrored content",v:3,f:3},
+ {p:"apps",n:"Containerise Java app-server estate",d:"WebLogic or WebSphere apps to JBoss EAP or Quarkus",v:5,f:3},
+ {p:"apps",n:"GitOps for apps and clusters",d:"Argo CD with environment promotion",v:4,f:4},
+ {p:"apps",n:"Internal developer portal",d:"Developer Hub with golden-path templates",v:4,f:3},
+ {p:"apps",n:"Event streaming backbone",d:"Kafka for real-time integration",v:4,f:3},
+ {p:"sec",n:"Signed images & admission policy",d:"Trusted supply chain from commit to cluster",v:4,f:4},
+ {p:"sec",n:"Continuous compliance scanning",d:"Compliance Operator profiles as audit evidence",v:4,f:5},
+ {p:"sec",n:"Runtime security with ACS",d:"Vulnerability management and runtime detection",v:4,f:4},
+ {p:"ops",n:"Fleet management with ACM",d:"Policy-driven provisioning and governance",v:4,f:3},
+ {p:"ops",n:"Event-driven remediation",d:"Ansible responds to alerts automatically",v:3,f:3},
+ {p:"ops",n:"App-aware backup & DR",d:"OADP backups and tested restores",v:4,f:4},
+ {p:"virt",n:"VMware exit to OpenShift Virtualization",d:"Migrate the VM estate in waves",v:5,f:3},
+ {p:"virt",n:"Pilot migration wave",d:"20 to 50 low-risk VMs with MTV",v:4,f:4},
+ {p:"ai",n:"Self-hosted LLM serving",d:"Open models on-prem for sensitive data",v:4,f:2},
+ {p:"ai",n:"MLOps platform for data science",d:"OpenShift AI pipelines, registry and serving",v:4,f:3}
+];
+
+const INDUSTRIES=["Financial services","Insurance","Healthcare","Government","Retail","Manufacturing","Telecommunications","Energy & utilities","Education","Transport & logistics","Media & entertainment","Other"];
+const SIZES=["Under 500 employees","500 – 2,000","2,000 – 10,000","10,000+"];
+const STRATEGY=["On-premises first","Hybrid","Cloud-first","Multi-cloud","Edge-heavy"];
+const STAKE=["CIO / CTO","Head of infrastructure","Platform / DevOps lead","Enterprise architect","App & dev leads","Security & risk","Operations / SRE","Procurement / finance"];
+const FOOT=["Red Hat Enterprise Linux","OpenShift Container Platform","OpenShift Platform Plus","ROSA / ARO (managed)","Ansible Automation Platform","Red Hat Satellite","JBoss / Red Hat Runtimes","VMware vSphere","Other Kubernetes (EKS, AKS, GKE, Tanzu, Rancher)"];
+const PRIOS=["Reduce infrastructure cost","Exit VMware / hypervisor","Speed to market","Hybrid & multi-cloud portability","Risk & compliance","Reduce tech debt","Enable AI workloads","Developer productivity"];
+
+const STAGES=[
+ {id:"setup",label:"Engagement",kind:"setup"},
+ {id:"priorities",label:"Business outcomes",kind:"priorities"},
+ ...PILLARS.map(p=>({id:p.id,label:p.name,kind:"pillar"})),
+ {id:"usecases",label:"Use-case map",kind:"usecases"},
+ {id:"summary",label:"Readout",kind:"summary"}
+];
+function stageNo(id){return String(STAGES.findIndex(s=>s.id===id)+1).padStart(2,"0")}
+
+/* ---------- State ---------- */
+const KEY="ocp-discovery-v1";
+function today(){const d=new Date();return d.toISOString().slice(0,10)}
+function blank(){return {v:1,sample:false,meta:{customer:"",industry:"",size:"",strategy:"",date:today(),cse:"",stakeholders:[],footprint:[]},priorities:[],pains:"",initiatives:"",scores:{},notes:{},signals:{},usecases:[],stage:"setup",seq:1}}
+function sample(){
+  return {v:1,sample:true,
+   meta:{customer:"Tūī Bank (sample)",industry:"Financial services",size:"2,000 – 10,000",strategy:"Hybrid",date:today(),cse:"",stakeholders:["CIO / CTO","Head of infrastructure","Platform / DevOps lead","Security & risk"],footprint:["Red Hat Enterprise Linux","OpenShift Container Platform","Ansible Automation Platform","VMware vSphere"]},
+   priorities:["Exit VMware / hypervisor","Risk & compliance","Speed to market"],
+   pains:"VMware renewal quote is roughly three times last year's for about 1,800 VMs. Sixty Java apps run on WebLogic 12c and release monthly through a change board. Two OpenShift clusters built by a project team in 2023 have fallen out of support.",
+   initiatives:"VMware contract ends June 2027. Regulator operational-resilience review due Q2 2027. A new digital lending platform must launch within 12 months.",
+   scores:{pl1:2,pl2:3,pl3:2,pl4:2,pl5:1,ap1:2,ap2:1,ap3:2,ap4:1,ap5:3,se1:3,se2:2,se3:1,se4:2,se5:2,op1:2,op2:3,op3:1,op4:3,op5:2,vm1:3,vm2:2,vm3:1,vm4:2,ai1:2,ai2:1},
+   notes:{plat:"Two OCP 4.12 clusters on vSphere, no staging cluster. Storage is an existing SAN with a CSI driver but no replication.",apps:"Payments and onboarding apps are the first candidates. Developers wait about three weeks for a new environment.",sec:"Last audit flagged no image scanning and shared cluster-admin credentials.",ops:"Platform run by three engineers who also run vSphere. Ansible already used for RHEL patching.",virt:"About 1,800 VMs, 70% RHEL or Windows Server 2019+. Some Oracle DB VMs must stay put.",ai:"Fraud team wants to run models on customer data on-prem; GPUs not yet purchased."},
+   signals:{plat:["Clusters out of support","Hybrid or multi-cloud mandate"],apps:["Commercial app-server licence renewal","Developers waiting weeks for environments"],sec:["Audit or regulator findings"],ops:["Platform team stretched thin","No tested DR"],virt:["VMware licensing change","Hypervisor renewal date set"],ai:["Can't send data to public AI services"]},
+   usecases:[
+    {id:1,name:"VMware exit to OpenShift Virtualization",pillar:"virt",value:5,feas:3},
+    {id:2,name:"Pilot migration wave",pillar:"virt",value:4,feas:4},
+    {id:3,name:"Containerise Java app-server estate",pillar:"apps",value:5,feas:3},
+    {id:4,name:"Production OpenShift landing zone",pillar:"plat",value:4,feas:4},
+    {id:5,name:"Continuous compliance scanning",pillar:"sec",value:4,feas:5},
+    {id:6,name:"Self-hosted LLM serving",pillar:"ai",value:4,feas:2}
+   ],stage:"setup",seq:7};
+}
+let S;
+try{const raw=localStorage.getItem(KEY); S=raw?JSON.parse(raw):null}catch(e){S=null}
+if(!S||S.v!==1) S=sample();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ---------- Helpers ---------- */
+const $=s=>document.querySelector(s);
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function pcol(id){return "var("+PMAP[id].color+")"}
+function pillarScore(pid){const qs=PMAP[pid].qs;const vals=qs.map(q=>S.scores[q.id]).filter(Boolean);return {avg:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null,n:vals.length,total:qs.length}}
+function level(avg){if(avg==null)return{t:"Not assessed",c:0};if(avg<2)return{t:"Exploring",c:1};if(avg<3)return{t:"Emerging",c:2};if(avg<4)return{t:"Scaling",c:3};return{t:"Leading",c:4}}
+function quadrant(u){const hv=u.value>=3,hf=u.feas>=3; if(hv&&hf)return"Quick win"; if(hv)return"Strategic bet"; if(hf)return"Fill-in"; return"Park"}
+function totalQs(){return PILLARS.reduce((a,p)=>a+p.qs.length,0)}
+function answered(){return Object.keys(S.scores).filter(k=>S.scores[k]&&QMAP[k]).length}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2200)}
+function stageProgress(st){
+  if(st.kind==="setup"){const m=S.meta;const n=[m.customer,m.industry,m.size,m.stakeholders.length,m.footprint.length].filter(Boolean).length;return{t:n+"/5",done:n===5}}
+  if(st.kind==="priorities"){return{t:S.priorities.length+"/3",done:S.priorities.length===3}}
+  if(st.kind==="pillar"){const s=pillarScore(st.id);return{t:s.n+"/"+s.total,done:s.n===s.total}}
+  if(st.kind==="usecases"){return{t:String(S.usecases.length),done:S.usecases.length>=3}}
+  return{t:"",done:false};
+}
+
+/* ---------- Shell ---------- */
+function renderMeter(){
+  const a=answered(),t=totalQs();
+  $("#meter").innerHTML='<span>Coverage</span><div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="'+t+'" aria-valuenow="'+a+'"><div class="fill" style="width:'+(a/t*100)+'%"></div></div><span>'+a+" / "+t+" questions</span>";
+}
+function renderRail(){
+  let h='<div class="cust"><b>'+esc(S.meta.customer||"New customer")+"</b>"+esc([S.meta.industry,S.meta.date].filter(Boolean).join(" · "))+"</div>";
+  STAGES.forEach((st,i)=>{
+    const pr=stageProgress(st);
+    if(st.id==="usecases")h+="<hr>";
+    const lead=st.kind==="pillar"?'<span class="dot" style="background:'+pcol(st.id)+'"></span>':'<span class="n">'+String(i+1).padStart(2,"0")+"</span>";
+    h+='<button class="step" data-go="'+st.id+'"'+(S.stage===st.id?' aria-current="step"':"")+">"+lead+'<span class="lbl">'+esc(st.label)+'</span><span class="cnt'+(pr.done?" done":"")+'">'+pr.t+"</span></button>";
+  });
+  $("#rail").innerHTML=h;
+  renderMeter();
+}
+function navRow(){
+  const i=STAGES.findIndex(s=>s.id===S.stage);
+  const prev=STAGES[i-1],next=STAGES[i+1];
+  return '<div class="navrow">'+(prev?'<button class="btn" data-go="'+prev.id+'">← '+esc(prev.label)+"</button>":"<span></span>")+(next?'<button class="btn pri" data-go="'+next.id+'">'+esc(next.label)+" →</button>":"")+"</div>";
+}
+function banner(){
+  if(!S.sample)return"";
+  return '<div class="banner"><span><b>Sample data.</b> Tūī Bank is a fictional bank, loaded so you can see a completed discovery.</span><button class="btn sm" data-act="new">Start a new discovery</button></div>';
+}
+function render(){
+  const st=STAGES.find(s=>s.id===S.stage)||STAGES[0];
+  let h=banner();
+  if(st.kind==="setup")h+=vSetup();
+  else if(st.kind==="priorities")h+=vPriorities();
+  else if(st.kind==="pillar")h+=vPillar(PMAP[st.id]);
+  else if(st.kind==="usecases")h+=vUsecases();
+  else h+=vSummary();
+  if(st.kind!=="summary")h+=navRow();
+  $("#main").innerHTML=h;
+  renderRail();
+}
+
+/* ---------- Views ---------- */
+function sel(id,path,opts,val){return '<select id="'+id+'" data-bind="'+path+'"><option value="">Select…</option>'+opts.map(o=>'<option'+(o===val?" selected":"")+">"+esc(o)+"</option>").join("")+"</select>"}
+function chipList(path,opts,vals){return '<div class="chips">'+opts.map(o=>'<button class="chip" data-list="'+path+'" data-val="'+esc(o)+'" aria-pressed="'+(vals.includes(o))+'">'+esc(o)+"</button>").join("")+"</div>"}
+
+function vSetup(){
+  const m=S.meta;
+  return '<div class="head"><div class="eyebrow">Stage 01 · Before the workshop</div><h2>Engagement</h2><p>Capture who you are meeting and what they already own. Their Red Hat and platform footprint shapes which engagements and subscription conversations fit.</p></div>'+
+  '<div class="panel stack">'+
+   '<div class="grid2">'+
+    '<div class="field"><label for="f-cust">Customer</label><input type="text" id="f-cust" data-bind="meta.customer" value="'+esc(m.customer)+'" placeholder="e.g. Contoso Bank"></div>'+
+    '<div class="field"><label for="f-date">Workshop date</label><input type="date" id="f-date" data-bind="meta.date" value="'+esc(m.date)+'"></div>'+
+    '<div class="field"><label for="f-ind">Industry</label>'+sel("f-ind","meta.industry",INDUSTRIES,m.industry)+'</div>'+
+    '<div class="field"><label for="f-size">Organisation size</label>'+sel("f-size","meta.size",SIZES,m.size)+'</div>'+
+    '<div class="field"><label for="f-strat">Cloud posture</label>'+sel("f-strat","meta.strategy",STRATEGY,m.strategy)+'</div>'+
+    '<div class="field"><label for="f-cse">Consultant / architect</label><input type="text" id="f-cse" data-bind="meta.cse" value="'+esc(m.cse)+'" placeholder="Your name"></div>'+
+   '</div>'+
+   '<div class="field"><span class="lab">Stakeholders in the room</span>'+chipList("meta.stakeholders",STAKE,m.stakeholders)+'</div>'+
+   '<div class="field"><span class="lab">Current Red Hat &amp; platform footprint</span>'+chipList("meta.footprint",FOOT,m.footprint)+'<span class="hint">Existing OpenShift or Ansible subscriptions, and a hypervisor renewal date, usually change which first engagement makes sense.</span></div>'+
+  '</div>';
+}
+function vPriorities(){
+  const full=S.priorities.length>=3;
+  return '<div class="head"><div class="eyebrow">Stage 02 · Why now</div><h2>Business outcomes</h2><p>Anchor every technical conversation to an outcome the sponsor cares about. Pick the top three in order; the first pick carries the most weight in the readout.</p></div>'+
+  '<div class="panel stack">'+
+   '<div class="field"><span class="lab">Top three priorities, in order</span><div class="chips">'+
+    PRIOS.map(o=>{const i=S.priorities.indexOf(o);return '<button class="chip rank'+(full&&i<0?" dim":"")+'" data-prio="'+esc(o)+'" aria-pressed="'+(i>=0)+'">'+(i>=0?'<span class="rk">#'+(i+1)+"</span>":"")+esc(o)+"</button>"}).join("")+
+   '</div><span class="hint">Tap a selected priority to remove it.</span></div>'+
+   '<div class="field"><label for="f-pains">Pain points, in their words</label><textarea id="f-pains" data-bind="pains" placeholder="Numbers help: VM counts, release frequency, days to get an environment, licence costs…">'+esc(S.pains)+'</textarea></div>'+
+   '<div class="field"><label for="f-init">Deadlines, initiatives and triggers</label><textarea id="f-init" data-bind="initiatives" placeholder="Hypervisor renewals, datacentre exits, support end dates, regulatory reviews…">'+esc(S.initiatives)+'</textarea></div>'+
+  '</div>';
+}
+function vPillar(p){
+  const s=pillarScore(p.id),lv=level(s.avg);
+  const idx=STAGES.findIndex(x=>x.id===p.id)+1;
+  let qh="";
+  p.qs.forEach(q=>{
+    const v=S.scores[q.id]||0;
+    qh+='<div class="q" id="q-'+q.id+'"><div class="qtop"><h3>'+esc(q.t)+'</h3><span class="qid">'+q.id.toUpperCase()+'</span></div>'+
+      '<p class="ask">'+esc(q.ask)+'</p>'+
+      '<div class="scale" role="group" aria-label="Maturity for '+esc(q.t)+'">'+[1,2,3,4,5].map(n=>'<button class="sc" data-q="'+q.id+'" data-v="'+n+'" aria-pressed="'+(v===n)+'">'+n+"</button>").join("")+'</div>'+
+      '<div class="anchors"><span><b>1</b>'+esc(q.l1)+'</span><span><b>3</b>'+esc(q.l3)+'</span><span><b>5</b>'+esc(q.l5)+'</span></div></div>';
+  });
+  return '<div class="head"><div class="eyebrow"><span class="sw" style="background:'+pcol(p.id)+'"></span>Stage '+String(idx).padStart(2,"0")+' · Assess</div>'+
+   '<div class="pillhead"><h2>'+esc(p.name)+'</h2><div class="scorebig" id="pscore"><b>'+(s.avg==null?"–":s.avg.toFixed(1))+'</b><span>/ 5 · '+s.n+' of '+s.total+'</span> <span class="tag lv-'+lv.c+'">'+lv.t+'</span></div></div><p>'+esc(p.blurb)+'</p></div>'+
+   '<div class="stack">'+
+    '<div class="panel"><div class="field"><span class="lab">Signals heard</span>'+chipList("signals."+p.id,p.signals,S.signals[p.id]||[])+'</div></div>'+
+    '<div class="panel"><div class="sectitle"><h3>Maturity</h3><span class="muted">Score what you hear, not what they hope. Tap again to clear.</span></div>'+qh+'</div>'+
+    '<div class="panel"><div class="field"><label for="n-'+p.id+'">Notes and follow-ups</label><textarea id="n-'+p.id+'" data-bind="notes.'+p.id+'" placeholder="Quotes, numbers, names, open questions…">'+esc(S.notes[p.id]||"")+'</textarea></div></div>'+
+   '</div>';
+}
+function matrixSVG(list,small){
+  const W=440,H=330,L=54,R=424,T=16,B=286;
+  const X=f=>L+(f-1)/4*(R-L), Y=v=>B-(v-1)/4*(B-T);
+  const mx=X(3),my=Y(3);
+  let g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Value versus feasibility matrix">';
+  g+='<rect x="'+mx+'" y="'+T+'" width="'+(R-mx)+'" height="'+(my-T)+'" fill="var(--accent-soft)"/>';
+  g+='<rect x="'+L+'" y="'+T+'" width="'+(R-L)+'" height="'+(B-T)+'" fill="none" stroke="var(--line)"/>';
+  [1,2,3,4,5].forEach(i=>{
+    g+='<line x1="'+X(i)+'" x2="'+X(i)+'" y1="'+T+'" y2="'+B+'" stroke="var(--line-2)"/>';
+    g+='<line y1="'+Y(i)+'" y2="'+Y(i)+'" x1="'+L+'" x2="'+R+'" stroke="var(--line-2)"/>';
+    g+='<text x="'+X(i)+'" y="'+(B+16)+'" text-anchor="middle" font-size="11" font-family="IBM Plex Mono,monospace" fill="var(--ink-3)">'+i+'</text>';
+    g+='<text x="'+(L-10)+'" y="'+(Y(i)+4)+'" text-anchor="end" font-size="11" font-family="IBM Plex Mono,monospace" fill="var(--ink-3)">'+i+'</text>';
+  });
+  g+='<line x1="'+L+'" x2="'+R+'" y1="'+my+'" y2="'+my+'" stroke="var(--ink-3)" stroke-dasharray="4 4" opacity=".5"/><line x1="'+mx+'" x2="'+mx+'" y1="'+T+'" y2="'+B+'" stroke="var(--ink-3)" stroke-dasharray="4 4" opacity=".5"/>';
+  const ql=(x,y,t,a)=>'<text x="'+x+'" y="'+y+'" text-anchor="'+a+'" font-size="11" font-weight="600" font-family="IBM Plex Mono,monospace" fill="var(--ink-3)" letter-spacing=".06em">'+t+'</text>';
+  g+=ql(R-8,T+16,"QUICK WINS","end")+ql(L+8,T+16,"STRATEGIC BETS","start")+ql(R-8,B-8,"FILL-INS","end")+ql(L+8,B-8,"PARK","start");
+  g+='<text x="'+((L+R)/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="11.5" fill="var(--ink-2)" font-family="IBM Plex Sans,sans-serif">Feasibility →</text>';
+  g+='<text transform="translate(14 '+((T+B)/2)+') rotate(-90)" text-anchor="middle" font-size="11.5" fill="var(--ink-2)" font-family="IBM Plex Sans,sans-serif">Business value →</text>';
+  const groups={};
+  list.forEach((u,i)=>{const k=u.value+"_"+u.feas;(groups[k]=groups[k]||[]).push([u,i])});
+  Object.values(groups).forEach(arr=>{
+    arr.forEach(([u,i],j)=>{
+      let dx=0,dy=0; if(arr.length>1){const a=(j/arr.length)*Math.PI*2-Math.PI/2;dx=Math.cos(a)*15;dy=Math.sin(a)*15}
+      const cx=Math.min(R-12,Math.max(L+12,X(u.feas)+dx)),cy=Math.min(B-12,Math.max(T+12,Y(u.value)+dy));
+      g+='<g><title>'+esc(u.name)+'</title><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="'+pcol(u.pillar)+'" stroke="var(--surface)" stroke-width="2"/><text x="'+cx+'" y="'+(cy+4)+'" text-anchor="middle" font-size="11" font-weight="600" font-family="IBM Plex Mono,monospace" fill="var(--surface)">'+(i+1)+'</text></g>';
+    });
+  });
+  return g+"</svg>";
+}
+function legend(){return '<div class="legend">'+PILLARS.map(p=>'<span><i style="background:'+pcol(p.id)+'"></i>'+esc(p.name)+"</span>").join("")+"</div>"}
+function vUsecases(){
+  const opts=(v)=>[1,2,3,4,5].map(n=>'<option'+(n===v?" selected":"")+">"+n+"</option>").join("");
+  const existing=new Set(S.usecases.map(u=>u.name.toLowerCase()));
+  let rows=S.usecases.map((u,i)=>'<tr><td><span class="idx" style="background:'+pcol(u.pillar)+'">'+(i+1)+'</span></td><td>'+esc(u.name)+'<div class="muted">'+esc(PMAP[u.pillar].name)+' · '+quadrant(u)+'</div></td>'+
+    '<td><select aria-label="Value" data-uc="'+u.id+'" data-f="value">'+opts(u.value)+'</select></td><td><select aria-label="Feasibility" data-uc="'+u.id+'" data-f="feas">'+opts(u.feas)+'</select></td>'+
+    '<td><button class="btn sm danger" data-del="'+u.id+'" aria-label="Remove '+esc(u.name)+'">Remove</button></td></tr>').join("");
+  const table=S.usecases.length?'<div class="tblwrap"><table><thead><tr><th>#</th><th>Use case</th><th>Value</th><th>Feasibility</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">No use cases yet. Add one above or pick from the library.</div>';
+  const lib=PILLARS.map(p=>'<div class="field"><span class="lab">'+esc(p.name)+'</span><div class="tpls">'+TEMPLATES.filter(t=>t.p===p.id).map(t=>{const has=existing.has(t.n.toLowerCase());return '<button class="tpl" data-tpl="'+esc(t.n)+'"'+(has?" disabled":"")+'><span class="sw" style="background:'+pcol(p.id)+'"></span><span><b>'+esc(t.n)+'</b><span>'+esc(t.d)+'</span></span><i>'+(has?"Added":"+ Add")+'</i></button>'}).join("")+'</div></div>').join("");
+  return '<div class="head"><div class="eyebrow">Stage '+stageNo("usecases")+' · Prioritise</div><h2>Use-case map</h2><p>List the ideas the customer raised, then score each for business value and feasibility (skills, platform readiness, dependencies). High-high is where the first proof of value should come from.</p></div>'+
+  '<div class="stack">'+
+   '<div class="panel"><h3 class="sec">Add a use case</h3><div class="ucform">'+
+     '<div class="field f-name"><label for="uc-name">Name</label><input type="text" id="uc-name" placeholder="e.g. Payments app to OpenShift"></div>'+
+     '<div class="field"><label for="uc-p">Area</label><select id="uc-p">'+PILLARS.map(p=>'<option value="'+p.id+'">'+esc(p.name)+"</option>").join("")+'</select></div>'+
+     '<div class="field"><label for="uc-v">Value</label><select id="uc-v">'+opts(3)+'</select></div>'+
+     '<div class="field"><label for="uc-f">Feasibility</label><select id="uc-f">'+opts(3)+'</select></div>'+
+     '<button class="btn pri" data-act="adduc">Add</button>'+
+   '</div></div>'+
+   '<div class="split"><div class="panel matrix"><div class="sectitle"><h3>Value × feasibility</h3></div>'+matrixSVG(S.usecases)+legend()+'</div>'+
+   '<div class="panel">'+table+'</div></div>'+
+   '<div class="panel"><div class="sectitle"><h3>Use-case library</h3><span class="muted">Common patterns to prompt the conversation. Adjust scores after adding.</span></div><div class="grid2">'+lib+'</div></div>'+
+  '</div>';
+}
+
+/* ---------- Readout logic ---------- */
+function compute(){
+  const ps=PILLARS.map(p=>Object.assign({p},pillarScore(p.id)));
+  const recs=[];
+  PILLARS.forEach(p=>p.qs.forEach(q=>{const v=S.scores[q.id];if(v&&v<=3)recs.push({q,p,v})}));
+  recs.sort((a,b)=>a.v-b.v);
+  const uc=S.usecases.map((u,i)=>Object.assign({i:i+1,q:quadrant(u),score:u.value*u.feas},u)).sort((a,b)=>b.score-a.score||b.value-a.value);
+  const quick=uc.filter(u=>u.q==="Quick win").sort((a,b)=>b.value-a.value||b.score-a.score);
+  const sc=id=>S.scores[id]||0, avg=id=>pillarScore(id).avg;
+  const M=[];
+  const low=(id,t)=>sc(id)&&sc(id)<=t, has=(pid,s)=>(S.signals[pid]||[]).includes(s);
+  const plA=avg("plat");
+  if((plA!=null&&plA<3)||low("pl1",2))M.push({n:"OpenShift platform architecture & design workshop",w:"Platform foundations are early. Agree topology, tenancy, networking, storage and the upgrade policy before onboarding workloads."});
+  const top=quick[0];
+  if(top)M.push({n:"Pilot / proof of concept (4–6 weeks)",w:"Deliver “"+top.name+"” on a pilot cluster with a named team, agreed success criteria and production-grade guardrails."});
+  if(low("op1",2)||low("ap4",2))M.push({n:"Open Innovation Labs–style residency",w:"Skills and self-service are the bottleneck. Embed a customer team with experienced coaches for 6–12 weeks to ship a real workload and learn GitOps and platform practices."});
+  const apA=avg("apps");
+  if((apA!=null&&apA<3)||low("ap1",2))M.push({n:"Application modernisation assessment (MTA + wave plan)",w:"Portfolio fit and runtimes are unclear. Analyse priority repositories, size effort and build waves around the licence and renewal triggers you heard."});
+  if(low("ap3",2))M.push({n:"GitOps & platform engineering enablement",w:"Releases are manual. Stand up Argo CD and pipelines as a reusable baseline every team can adopt."});
+  const vmA=avg("virt");
+  if((vmA!=null&&vmA<3.5)||has("virt","VMware licensing change"))M.push({n:"VMware-to-OpenShift Virtualization assessment & pilot wave",w:"Hypervisor pressure is real. Build the inventory and business case against the renewal date, then prove the path with a pilot wave using MTV."});
+  const seA=avg("sec");
+  if((seA!=null&&seA<3)||low("se3",2))M.push({n:"Security posture & compliance assessment (ACS + Compliance Operator)",w:"Security gaps will block production approval. Baseline vulnerabilities, policy and compliance profiles alongside the pilot, not after it."});
+  if(low("op3",2)||low("op4",2)||low("op5",2))M.push({n:"Day-2 operations design (ACM, Ansible, OADP)",w:"Fleet consistency, automation or DR are weak. Design hub-based management, automation and backup before the cluster count grows."});
+  const aiA=avg("ai");
+  if(aiA!=null&&aiA<3)M.push({n:"OpenShift AI discovery & pilot",w:"AI ambitions outpace the platform. Agree one use case, then stand up model serving and accelerator sharing on OpenShift AI."});
+  M.push({n:"Confirm subscription model & commercial path",w:"Check sizing (cores vs bare-metal sockets), edition fit (Kubernetes Engine, Container Platform or Platform Plus), cloud marketplace commitments and partner funding with the Red Hat account team before scoping."});
+  return {ps,recs,uc,quick,motions:M};
+}
+function planItems(c){
+  const top=c.quick[0]||c.uc[0];
+  const d30=["Play back this readout to the sponsor and confirm the top three outcomes",(c.motions[0]?"Schedule: "+c.motions[0].n:"Agree the first engagement"),top?"Confirm data access and owners for “"+top.name+"”":"Shortlist two or three use cases with the business"];
+  const d60=[top?"Build and test “"+top.name+"” with a named user group":"Run a prototype on the highest-value use case","Stand up the pilot cluster, GitOps baseline and security guardrails the pilot needs","Collect baseline metrics for the business case"];
+  const d90=["Present results and business case to the sponsor","Agree the production path, owners and support model","Line up the next two use cases from the map"];
+  return [d30,d60,d90];
+}
+function vSummary(){
+  const c=compute(),m=S.meta;
+  const ticks=[1,2,3,4,5].map(i=>'<span style="left:'+(i/5*100)+'%">'+i+"</span>").join("");
+  const bars=c.ps.map(x=>{const lv=level(x.avg);return '<div class="bar"><span class="nm">'+esc(x.p.name)+'<br><span class="tag lv-'+lv.c+'" style="margin-top:4px">'+lv.t+'</span></span><div class="tr">'+(x.avg!=null?'<div class="fl" style="width:'+(x.avg/5*100)+'%;background:'+pcol(x.p.id)+'"></div>':"")+'</div><span class="v">'+(x.avg==null?"–":x.avg.toFixed(1))+"</span></div>"}).join("");
+  const recsBy=PILLARS.map(p=>{const r=c.recs.filter(x=>x.p.id===p.id).slice(0,3);if(!r.length)return"";return r.map(x=>'<div class="rec"><span class="stripe" style="background:'+pcol(p.id)+'"></span><div><h4>'+esc(x.q.t)+' <span class="tag lv-'+(x.v<=2?1:2)+'">'+(x.v<=2?"Gap":"Build")+" · "+x.v+'/5</span></h4><p>'+esc(x.q.rec)+'</p><div class="prod">'+x.q.w.map(w=>"<span>"+esc(w)+"</span>").join("")+"</div></div></div>").join("")}).join("");
+  const plan=planItems(c);
+  const ucList=c.uc.slice(0,5).map(u=>'<tr><td><span class="idx" style="background:'+pcol(u.pillar)+'">'+u.i+'</span></td><td>'+esc(u.name)+'</td><td class="nw">'+u.q+'</td><td class="num">'+u.value+" × "+u.feas+"</td></tr>").join("");
+  const sigs=PILLARS.flatMap(p=>(S.signals[p.id]||[]));
+  return '<div class="head"><div class="eyebrow">Stage '+stageNo("summary")+' · Play back</div><h2>Readout for '+esc(m.customer||"this customer")+'</h2><p>Generated from the scores, signals and use cases captured. Review it, then copy it into your follow-up email, account plan or opportunity notes.</p></div>'+
+  '<div class="stack">'+
+   '<div class="panel"><div class="kv"><div>Industry<b>'+esc(m.industry||"–")+'</b></div><div>Size<b>'+esc(m.size||"–")+'</b></div><div>Cloud posture<b>'+esc(m.strategy||"–")+'</b></div><div>Date<b>'+esc(m.date||"–")+'</b></div></div>'+
+    (S.priorities.length?'<div style="margin-top:14px" class="field"><span class="lab">Priorities</span><div class="chips">'+S.priorities.map((p,i)=>'<span class="chip rank" aria-pressed="true"><span class="rk">#'+(i+1)+"</span>"+esc(p)+"</span>").join("")+"</div></div>":"")+
+    (sigs.length?'<div style="margin-top:14px" class="field"><span class="lab">Signals heard</span><div class="chips">'+sigs.map(s=>'<span class="chip">'+esc(s)+"</span>").join("")+"</div></div>":"")+
+   '</div>'+
+   '<div class="split">'+
+    '<div class="panel"><h3 class="sec">Readiness by area</h3><div class="bars">'+bars+'<div class="axis"><span></span><div class="ticks">'+ticks+'</div><span></span></div></div><p class="muted" style="margin:14px 0 0">Average of answered questions on a 1–5 scale. Exploring &lt;2 · Emerging 2–3 · Scaling 3–4 · Leading 4+.</p></div>'+
+    '<div class="panel matrix"><h3 class="sec">Use-case priorities</h3>'+(c.uc.length?matrixSVG(S.usecases)+'<div class="tblwrap" style="margin-top:8px"><table><thead><tr><th>#</th><th>Top use cases</th><th>Quadrant</th><th>V × F</th></tr></thead><tbody>'+ucList+"</tbody></table></div>":'<div class="empty">Add use cases on the map to rank them here.</div>')+'</div>'+
+   '</div>'+
+   '<div class="panel"><div class="sectitle"><h3>Recommended engagements</h3><span class="muted">Ordered by what unblocks the most</span></div><div class="motions">'+c.motions.map(x=>'<div class="motion"><b>'+esc(x.n)+'</b><span>'+esc(x.w)+"</span></div>").join("")+'</div></div>'+
+   '<div class="panel"><div class="sectitle"><h3>Gaps and recommended solutions</h3><span class="muted">Questions scored 3 or below, up to three per area, weakest first</span></div><div class="recs">'+(recsBy||'<div class="empty">Score the assessment areas to generate recommendations.</div>')+'</div></div>'+
+   '<div class="panel"><h3 class="sec">30 / 60 / 90 days</h3><div class="plan">'+["Next 30 days","Days 31–60","Days 61–90"].map((t,i)=>"<div><h4>"+t+"</h4><ul>"+plan[i].map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul></div>").join("")+'</div></div>'+
+   '<div class="panel stack"><h3 class="sec" style="margin:0">Share and save</h3>'+
+    '<div class="actions"><button class="btn pri" data-act="copymd">Copy readout (Markdown)</button><button class="btn" data-act="copyjson">Copy session data</button><button class="btn" data-act="showimport">Load a saved session</button><button class="btn danger" data-act="new">New discovery</button></div>'+
+    '<div id="io"></div>'+
+    '<p class="muted" style="margin:0">Your current discovery autosaves in this browser only. To keep a customer session or move it to another device, copy the session data and paste it back in later.</p>'+
+   '</div>'+
+  '</div>';
+}
+function markdown(){
+  const c=compute(),m=S.meta,plan=planItems(c);
+  let o="# Discovery readout: "+(m.customer||"Customer")+"\n\n";
+  o+="**Date:** "+(m.date||"–")+"  \n**Industry:** "+(m.industry||"–")+" · **Size:** "+(m.size||"–")+" · **Cloud posture:** "+(m.strategy||"–")+"  \n";
+  if(m.stakeholders.length)o+="**Stakeholders:** "+m.stakeholders.join(", ")+"  \n";
+  if(m.footprint.length)o+="**Red Hat & platform footprint:** "+m.footprint.join(", ")+"  \n";
+  if(m.cse)o+="**Consultant:** "+m.cse+"  \n";
+  o+="\n## Business outcomes\n"+(S.priorities.length?S.priorities.map((p,i)=>(i+1)+". "+p).join("\n"):"Not captured")+"\n";
+  if(S.pains)o+="\n**Pain points:** "+S.pains+"\n";
+  if(S.initiatives)o+="\n**Triggers and deadlines:** "+S.initiatives+"\n";
+  o+="\n## Readiness (1–5)\n| Area | Score | Level |\n|---|---|---|\n";
+  c.ps.forEach(x=>{o+="| "+x.p.name+" | "+(x.avg==null?"–":x.avg.toFixed(1))+" | "+level(x.avg).t+" |\n"});
+  PILLARS.forEach(p=>{const s=S.signals[p.id]||[],n=S.notes[p.id];if(s.length||n){o+="\n**"+p.name+"**"+(s.length?" — signals: "+s.join("; "):"")+"\n";if(n)o+="> "+n.replace(/\n/g,"\n> ")+"\n"}});
+  if(c.uc.length){o+="\n## Prioritised use cases\n| # | Use case | Area | Value | Feasibility | Quadrant |\n|---|---|---|---|---|---|\n";c.uc.forEach(u=>{o+="| "+u.i+" | "+u.name+" | "+PMAP[u.pillar].name+" | "+u.value+" | "+u.feas+" | "+u.q+" |\n"})}
+  o+="\n## Recommended engagements\n"+c.motions.map(x=>"- **"+x.n+"** — "+x.w).join("\n")+"\n";
+  if(c.recs.length){o+="\n## Gaps and recommended solutions\n";PILLARS.forEach(p=>{const r=c.recs.filter(x=>x.p.id===p.id).slice(0,3);if(r.length){o+="\n### "+p.name+"\n";r.forEach(x=>{o+="- **"+x.q.t+" ("+x.v+"/5):** "+x.q.rec+" _"+x.q.w.join(", ")+"_\n"})}})}
+  o+="\n## 30 / 60 / 90 days\n";["Next 30 days","Days 31–60","Days 61–90"].forEach((t,i)=>{o+="\n**"+t+"**\n"+plan[i].map(x=>"- "+x).join("\n")+"\n"});
+  return o;
+}
+function copyText(txt,label){
+  const fallback=()=>{$("#io").innerHTML='<div class="field"><label for="io-t">Select all and copy</label><textarea id="io-t" style="min-height:200px">'+esc(txt)+"</textarea></div>";const t=$("#io-t");t.focus();t.select()};
+  try{navigator.clipboard.writeText(txt).then(()=>toast(label+" copied")).catch(fallback)}catch(e){fallback()}
+}
+function loadSession(txt){
+  try{const d=JSON.parse(txt);if(!d||d.v!==1||!d.meta||!d.scores)throw 0;S=Object.assign(blank(),d);S.sample=false;S.stage="summary";save();render();toast("Session loaded");return true}catch(e){return false}
+}
+
+/* ---------- Events ---------- */
+function setPath(path,val){const parts=path.split(".");let o=S;for(let i=0;i<parts.length-1;i++){o[parts[i]]=o[parts[i]]||{};o=o[parts[i]]}o[parts[parts.length-1]]=val}
+function getPath(path){return path.split(".").reduce((o,k)=>o==null?o:o[k],S)}
+document.addEventListener("input",e=>{
+  const b=e.target.closest("[data-bind]");if(!b)return;
+  setPath(b.dataset.bind,b.value);save();
+  if(b.dataset.bind.startsWith("meta."))renderRail();
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.dataset.bind){setPath(t.dataset.bind,t.value);save();renderRail();return}
+  if(t.dataset.uc){const u=S.usecases.find(x=>x.id==t.dataset.uc);if(u){u[t.dataset.f]=+t.value;save();render()}return}
+  if(t.id==="io-file"&&t.files&&t.files[0]){const r=new FileReader();r.onload=()=>{if(!loadSession(r.result))toast("That file isn't a saved discovery session")};r.readAsText(t.files[0])}
+});
+document.addEventListener("click",e=>{
+  const el=e.target.closest("button");if(!el)return;
+  if(el.dataset.go){S.stage=el.dataset.go;save();render();window.scrollTo({top:0});return}
+  if(el.dataset.q){
+    const q=el.dataset.q,v=+el.dataset.v;
+    S.scores[q]=S.scores[q]===v?0:v; if(!S.scores[q])delete S.scores[q]; save();
+    el.parentElement.querySelectorAll(".sc").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.v===S.scores[q])));
+    const p=QMAP[q].pillar,s=pillarScore(p),lv=level(s.avg);
+    $("#pscore").innerHTML='<b>'+(s.avg==null?"–":s.avg.toFixed(1))+'</b><span>/ 5 · '+s.n+' of '+s.total+'</span> <span class="tag lv-'+lv.c+'">'+lv.t+"</span>";
+    renderRail();return;
+  }
+  if(el.dataset.list){
+    const arr=getPath(el.dataset.list)||[];const v=el.dataset.val;const i=arr.indexOf(v);
+    if(i>=0)arr.splice(i,1);else arr.push(v);setPath(el.dataset.list,arr);save();
+    el.setAttribute("aria-pressed",String(i<0));renderRail();return;
+  }
+  if(el.dataset.prio){
+    const v=el.dataset.prio,i=S.priorities.indexOf(v);
+    if(i>=0)S.priorities.splice(i,1);else if(S.priorities.length<3)S.priorities.push(v);else{toast("Three priorities max. Remove one first.");return}
+    save();render();return;
+  }
+  if(el.dataset.tpl){const t=TEMPLATES.find(x=>x.n===el.dataset.tpl);S.usecases.push({id:S.seq++,name:t.n,pillar:t.p,value:t.v,feas:t.f});save();render();toast("Added to the map");return}
+  if(el.dataset.del){S.usecases=S.usecases.filter(u=>u.id!=el.dataset.del);save();render();return}
+  const a=el.dataset.act;
+  if(a==="adduc"){const n=$("#uc-name").value.trim();if(!n){$("#uc-name").focus();toast("Give the use case a name");return}S.usecases.push({id:S.seq++,name:n,pillar:$("#uc-p").value,value:+$("#uc-v").value,feas:+$("#uc-f").value});save();render();$("#uc-name").focus();return}
+  if(a==="new"){
+    const host=el.closest(".banner")||el.closest(".actions");
+    if(document.getElementById("cf"))return;
+    host.insertAdjacentHTML("afterend",'<div class="confirm" id="cf" style="margin-bottom:12px"><span>Clear everything and start a blank discovery?'+(S.sample?"":" Copy the session data first if you want to keep it.")+'</span><button class="btn sm danger" data-act="reset">Clear and start</button><button class="btn sm" data-act="cancel">Cancel</button></div>');return;
+  }
+  if(a==="cancel"){const c=document.getElementById("cf");if(c)c.remove();return}
+  if(a==="reset"){S=blank();save();render();toast("Blank discovery started");return}
+  if(a==="copymd"){copyText(markdown(),"Readout");return}
+  if(a==="copyjson"){copyText(JSON.stringify(S),"Session data");return}
+  if(a==="showimport"){$("#io").innerHTML='<div class="stack"><div class="field"><label for="io-paste">Paste session data</label><textarea id="io-paste" placeholder="Paste the text from “Copy session data”"></textarea></div><div class="actions"><button class="btn pri" data-act="doimport">Load session</button><label class="btn" for="io-file" style="display:inline-block">Choose a .json file</label><input type="file" id="io-file" accept=".json,application/json,text/plain" hidden></div></div>';return}
+  if(a==="doimport"){if(!loadSession($("#io-paste").value))toast("That text isn't a saved discovery session");return}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="uc-name"){e.preventDefault();document.querySelector('[data-act="adduc"]').click()}});
+
+render();
+})();
+</script>
+
+</body>
+</html>

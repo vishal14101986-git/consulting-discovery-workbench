@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consulting Discovery Workbenches</title>
+<meta name="description" content="Browser-based discovery workbenches for consulting workshops: AI & Apps and Red Hat OpenShift.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#F1F0EE;--surface:#FFFFFF;--ink:#1C1B19;--ink-2:#4A4744;--ink-3:#77726D;--line:#DEDAD5;
+  --ai:#0E6B63;--ocp:#A3222A;--shadow:0 1px 2px rgba(28,27,25,.06),0 4px 16px rgba(28,27,25,.05)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#121110;--surface:#1B1A18;--ink:#EDEAE6;--ink-2:#BDB7B1;--ink-3:#938D87;--line:#34312E;--ai:#4FC2B5;--ocp:#F2878B;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25)}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#121110;--surface:#1B1A18;--ink:#EDEAE6;--ink-2:#BDB7B1;--ink-3:#938D87;--line:#34312E;--ai:#4FC2B5;--ocp:#F2878B;--shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans","Segoe UI",system-ui,sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:56px 20px 72px}
+small{font:500 11px/1.4 "IBM Plex Mono",ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+h1{font:700 clamp(30px,5vw,44px)/1.08 "Bricolage Grotesque","Segoe UI",sans-serif;letter-spacing:-.015em;margin:8px 0 14px;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:62ch;margin:0 0 36px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+a.card{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:22px;color:inherit;text-decoration:none;box-shadow:var(--shadow);transition:transform .15s}
+a.card:hover{transform:translateY(-2px)}
+a.card:focus-visible{outline:2px solid var(--c);outline-offset:3px}
+.card h2{font:700 22px/1.2 "Bricolage Grotesque","Segoe UI",sans-serif;margin:0}
+.card p{margin:0;color:var(--ink-2);font-size:15px}
+.card ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:14px}
+.card .go{margin-top:auto;font:500 13px "IBM Plex Mono",monospace;color:var(--c)}
+footer{margin-top:40px;color:var(--ink-3);font-size:13.5px;border-top:1px solid var(--line);padding-top:16px}
+@media (max-width:680px){.wrap{padding:36px 16px 56px}.cards{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){a.card{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <small>Consulting toolkit</small>
+  <h1>Discovery Workbenches</h1>
+  <p class="lede">Run a structured customer discovery workshop in the browser. Score maturity, capture signals and use cases, and get a readout with recommended engagements and a 30/60/90-day plan. Everything stays in your browser; nothing is sent to a server.</p>
+  <div class="cards">
+    <a class="card" href="ai/" style="--c:var(--ai)">
+      <small>Microsoft · AI &amp; Apps</small>
+      <h2>AI &amp; Apps Discovery</h2>
+      <p>For AI, app modernisation, low-code / Copilot and data conversations.</p>
+      <ul><li>4 areas, 25 maturity questions</li><li>Use-case value × feasibility map</li><li>Readout with engagements and product mapping</li></ul>
+      <span class="go">Open workbench →</span>
+    </a>
+    <a class="card" href="openshift/" style="--c:var(--ocp)">
+      <small>Red Hat · OpenShift</small>
+      <h2>OpenShift Discovery</h2>
+      <p>For container platform, modernisation, security, day-2, virtualization and AI conversations.</p>
+      <ul><li>6 areas, 28 maturity questions</li><li>18 OpenShift use-case patterns</li><li>Readout with engagements and product mapping</li></ul>
+      <span class="go">Open workbench →</span>
+    </a>
+  </div>
+  <footer>Sample customers are fictional. Sessions autosave in this browser's local storage; use "Copy session data" on the readout to move them between devices.</footer>
+</div>
+</body>
+</html>

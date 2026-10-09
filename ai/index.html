@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI &amp; Apps Discovery Workbench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#EDF1F0; --surface:#FFFFFF; --surface-2:#F5F8F7; --ink:#13201D; --ink-2:#43514D; --ink-3:#6B7874;
+  --line:#D3DCD9; --line-2:#E4EAE8; --accent:#0E6B63; --accent-ink:#FFFFFF; --accent-soft:#D6EBE8;
+  --warn:#A94E08; --warn-soft:#FBE8D6; --bad:#B3261E; --bad-soft:#F9DEDB; --good:#2B7A30; --good-soft:#DDF0DE;
+  --p-ai:#0E6B63; --p-apps:#3553A0; --p-lowcode:#9B3470; --p-data:#8E6300;
+  --shadow:0 1px 2px rgba(19,32,29,.06),0 4px 16px rgba(19,32,29,.05);
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0D1311; --surface:#151D1A; --surface-2:#1B2521; --ink:#E2EBE8; --ink-2:#B1BFBA; --ink-3:#889792;
+    --line:#2B3834; --line-2:#222D2A; --accent:#4FC2B5; --accent-ink:#05201C; --accent-soft:#163430;
+    --warn:#F0A35E; --warn-soft:#3A2616; --bad:#F2877F; --bad-soft:#3B1C1A; --good:#7FCB84; --good-soft:#18301A;
+    --p-ai:#4FC2B5; --p-apps:#90A9EA; --p-lowcode:#E28CC0; --p-data:#E4B44A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0D1311; --surface:#151D1A; --surface-2:#1B2521; --ink:#E2EBE8; --ink-2:#B1BFBA; --ink-3:#889792;
+  --line:#2B3834; --line-2:#222D2A; --accent:#4FC2B5; --accent-ink:#05201C; --accent-soft:#163430;
+  --warn:#F0A35E; --warn-soft:#3A2616; --bad:#F2877F; --bad-soft:#3B1C1A; --good:#7FCB84; --good-soft:#18301A;
+  --p-ai:#4FC2B5; --p-apps:#90A9EA; --p-lowcode:#E28CC0; --p-data:#E4B44A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);margin:0}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:18px 60px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-block:6px 18px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:12px}
+.mark{width:34px;height:34px;flex:none}
+.brand h1{font-size:20px;line-height:1.1}
+.brand small{display:block;font:500 11px/1.4 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.meter{display:flex;align-items:center;gap:10px;font:500 12px var(--f-mono);color:var(--ink-2)}
+.meter .track{width:140px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.meter .fill{height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
+.layout{display:grid;grid-template-columns:232px minmax(0,1fr);gap:28px;align-items:start}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);display:flex;flex-direction:column;gap:2px}
+.rail .cust{padding:0 10px 12px;font-size:13px;color:var(--ink-3)}
+.rail .cust b{display:block;color:var(--ink);font:600 15px/1.3 var(--f-body)}
+.step{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:0;background:none;text-align:left;cursor:pointer;color:var(--ink-2)}
+.step:hover{background:var(--surface-2)}
+.step[aria-current="step"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.step .n{font:500 11px var(--f-mono);color:var(--ink-3);text-align:center}
+.step .dot{width:10px;height:10px;border-radius:50%;justify-self:center}
+.step .lbl{font-size:14px;font-weight:500;line-height:1.25}
+.step .cnt{font:500 11px var(--f-mono);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.step .cnt.done{color:var(--good)}
+.rail hr{border:0;border-top:1px solid var(--line);margin:8px 10px}
+main{min-width:0}
+.banner{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:14px}
+.banner b{color:var(--warn)}
+.head{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.eyebrow{font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.eyebrow .sw{width:8px;height:8px;border-radius:2px}
+.head h2{font-size:30px;line-height:1.1}
+.head p{margin:0;color:var(--ink-2);max-width:68ch}
+.panel{background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:20px;box-shadow:var(--shadow)}
+.stack{display:flex;flex-direction:column;gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>label,.field>.lab{font-size:13px;font-weight:600;color:var(--ink-2)}
+.field .hint{font-size:12.5px;color:var(--ink-3)}
+input[type=text],input[type=date],select,textarea{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+textarea{min-height:84px;resize:vertical;line-height:1.5}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:6px 12px;font-size:13.5px;cursor:pointer;color:var(--ink-2);line-height:1.2}
+.chip:hover{border-color:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.rank{display:inline-flex;gap:6px;align-items:center}
+.chip .rk{font:500 11px var(--f-mono);opacity:.85}
+.chip.dim{opacity:.45}
+.q{display:flex;flex-direction:column;gap:12px;padding-block:18px;border-top:1px solid var(--line-2)}
+.q:first-child{border-top:0;padding-top:4px}
+.qtop{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.qtop h3{font:600 16px/1.3 var(--f-body);letter-spacing:0}
+.qid{font:500 11px var(--f-mono);color:var(--ink-3)}
+.ask{margin:0;padding-left:12px;border-left:3px solid var(--line);color:var(--ink-2);font-size:14.5px}
+.ask::before{content:"Ask  ";font:600 10.5px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.sc{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:8px 4px;cursor:pointer;font:600 15px var(--f-mono);color:var(--ink-2)}
+.sc:hover{border-color:var(--ink-3)}
+.sc[aria-pressed="true"]{color:#fff;border-color:transparent}
+.sc[aria-pressed="true"][data-v="1"],.sc[aria-pressed="true"][data-v="2"]{background:var(--bad)}
+.sc[aria-pressed="true"][data-v="3"]{background:var(--warn)}
+.sc[aria-pressed="true"][data-v="4"],.sc[aria-pressed="true"][data-v="5"]{background:var(--good)}
+:root[data-theme="dark"] .sc[aria-pressed="true"]{color:#0D1311}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sc[aria-pressed="true"]{color:#0D1311}}
+.anchors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;font-size:12.5px;color:var(--ink-3);line-height:1.4}
+.anchors span b{font:600 11px var(--f-mono);color:var(--ink-2);margin-right:4px}
+.anchors span:nth-child(2){text-align:center}.anchors span:nth-child(3){text-align:right}
+.pillhead{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.scorebig{display:flex;align-items:baseline;gap:8px}
+.scorebig b{font:700 34px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.scorebig span{font:500 12px var(--f-mono);color:var(--ink-3)}
+.tag{display:inline-block;font:500 11px/1 var(--f-mono);letter-spacing:.05em;text-transform:uppercase;padding:5px 8px;border-radius:5px}
+.lv-1{background:var(--bad-soft);color:var(--bad)}.lv-2{background:var(--warn-soft);color:var(--warn)}.lv-3{background:var(--accent-soft);color:var(--accent)}.lv-4{background:var(--good-soft);color:var(--good)}.lv-0{background:var(--line-2);color:var(--ink-3)}
+.navrow{display:flex;justify-content:space-between;gap:10px;margin-top:22px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 16px;cursor:pointer;font-weight:500;font-size:14px}
+.btn:hover{border-color:var(--ink-3)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{filter:brightness(1.07)}
+.btn.sm{padding:6px 11px;font-size:13px}
+.btn.danger{color:var(--bad)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.ucform{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.2fr) minmax(0,.8fr) minmax(0,.8fr) auto;gap:10px;align-items:end}
+.tpls{display:flex;flex-direction:column;gap:8px}
+.tpl{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:start;border:1px solid var(--line-2);background:var(--surface-2);border-radius:8px;padding:10px 12px;text-align:left;cursor:pointer}
+.tpl:hover{border-color:var(--ink-3)}
+.tpl .sw{width:10px;height:10px;border-radius:2px;margin-top:5px}
+.tpl b{font-weight:600;font-size:14px;display:block}
+.tpl span{font-size:12.5px;color:var(--ink-3)}
+.tpl i{font:500 11px var(--f-mono);font-style:normal;color:var(--accent);white-space:nowrap}
+.tpl[disabled]{opacity:.5;cursor:default}
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font:500 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding:8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);white-space:nowrap}
+td.nw,th{white-space:nowrap}
+td select{padding:5px 6px;width:auto}
+.idx{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;font:600 11px var(--f-mono);color:#fff}
+:root[data-theme="dark"] .idx{color:#0D1311}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .idx{color:#0D1311}}
+.matrix svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+.bars{display:flex;flex-direction:column;gap:14px}
+.bar{display:grid;grid-template-columns:130px minmax(0,1fr) 44px;gap:12px;align-items:center}
+.bar .nm{font-size:14px;font-weight:500}
+.bar .tr{position:relative;height:14px;background:var(--surface-2);border-radius:4px;border:1px solid var(--line-2)}
+.bar .fl{position:absolute;inset:0 auto 0 0;border-radius:3px}
+.bar .v{font:600 14px var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.axis{display:grid;grid-template-columns:130px minmax(0,1fr) 44px;gap:12px}
+.axis .ticks{position:relative;height:16px;font:500 10.5px var(--f-mono);color:var(--ink-3)}
+.axis .ticks span{position:absolute;transform:translateX(-50%)}
+.axis .ticks span:last-child{transform:translateX(-100%)}
+.recs{display:flex;flex-direction:column;gap:0}
+.rec{display:grid;grid-template-columns:4px minmax(0,1fr);gap:14px;padding-block:14px;border-top:1px solid var(--line-2)}
+.rec:first-child{border-top:0}
+.rec .stripe{border-radius:2px}
+.rec h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
+.rec p{margin:0 0 8px;color:var(--ink-2);font-size:14px}
+.prod{display:flex;flex-wrap:wrap;gap:6px}
+.prod span{font:500 11.5px var(--f-mono);background:var(--surface-2);border:1px solid var(--line-2);border-radius:5px;padding:3px 7px;color:var(--ink-2)}
+.motions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.motion{border:1px solid var(--line-2);border-radius:10px;padding:14px;background:var(--surface-2)}
+.motion b{display:block;font-size:14.5px;margin-bottom:4px}
+.motion span{font-size:13.5px;color:var(--ink-2)}
+.plan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.plan div{border-top:3px solid var(--accent);padding-top:10px}
+.plan h4{margin:0 0 6px;font:600 12px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.plan ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px}
+.kv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kv div{font-size:13px;color:var(--ink-3)}
+.kv b{display:block;color:var(--ink);font-size:14.5px;font-weight:600}
+.muted{color:var(--ink-3);font-size:13.5px}
+.empty{padding:22px;text-align:center;color:var(--ink-3);border:1px dashed var(--line);border-radius:10px;font-size:14px}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:14px;box-shadow:var(--shadow);z-index:20}
+.confirm{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--bad-soft);border-radius:8px;padding:10px 12px;font-size:14px}
+h3.sec{font-size:18px;margin-bottom:12px}
+.sectitle{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.sectitle h3{font-size:18px}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr);gap:16px}
+  .rail{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:6px;margin-inline:-4px}
+  .rail .cust,.rail hr{display:none}
+  .step{grid-template-columns:auto auto;white-space:nowrap;flex:none}
+  .step .cnt{display:none}
+  .split,.motions{grid-template-columns:minmax(0,1fr)}
+  .kv{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:16px}
+  .grid2,.plan{grid-template-columns:minmax(0,1fr)}
+  .ucform{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .ucform .f-name{grid-column:1/-1}
+  .head h2{font-size:25px}
+  .bar,.axis{grid-template-columns:92px minmax(0,1fr) 36px;gap:8px}
+  .anchors{grid-template-columns:minmax(0,1fr)}
+  .anchors span:nth-child(n){text-align:left}
+  .meter .track{width:90px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 34 34" aria-hidden="true">
+        <rect x="1" y="1" width="15" height="15" rx="3" fill="var(--p-ai)"/>
+        <rect x="18" y="1" width="15" height="15" rx="3" fill="var(--p-apps)"/>
+        <rect x="1" y="18" width="15" height="15" rx="3" fill="var(--p-lowcode)"/>
+        <rect x="18" y="18" width="15" height="15" rx="3" fill="var(--p-data)"/>
+        <circle cx="17" cy="17" r="5.5" fill="var(--bg)"/>
+        <circle cx="17" cy="17" r="2.5" fill="var(--ink)"/>
+      </svg>
+      <div><small>Solution Engineer · AI &amp; Apps</small><h1>Discovery Workbench</h1></div>
+    </div>
+    <div class="meter" id="meter"></div>
+  </header>
+  <div class="layout">
+    <nav class="rail" id="rail" aria-label="Discovery stages"></nav>
+    <main id="main"></main>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Content model ---------- */
+const PILLARS = [
+ {id:"ai", name:"AI & agents", short:"AI", color:"--p-ai",
+  blurb:"Generative AI and agent readiness: strategy, grounding data, platform, responsible AI and the ability to ship and operate agents.",
+  signals:["Board is asking for an AI plan","Shadow use of public AI tools","Contact-centre cost pressure","Existing Azure OpenAI proof of concept","Competitor launched an AI feature","Regulator scrutiny of AI use"],
+  qs:[
+   {id:"ai1",t:"AI strategy & sponsorship",ask:"Who owns AI outcomes today, and how are AI ideas funded and prioritised?",l1:"Ad hoc experiments, no sponsor",l3:"Sponsor and a shortlist, funded per project",l5:"Exec-sponsored portfolio with KPIs and a funded roadmap",rec:"Run an AI envisioning session with the executive sponsor to agree three outcomes and how success will be measured.",w:["AI envisioning workshop","Business value framework"]},
+   {id:"ai2",t:"Data readiness for grounding",ask:"Where does the knowledge an assistant would need live, and is it clean, current and permissioned?",l1:"Scattered file shares, no owners",l3:"Key sources known, partial access control",l5:"Curated, indexed and labelled sources",rec:"Stand up a governed retrieval layer over two or three priority sources before building agents on top.",w:["Azure AI Search","Foundry IQ","Microsoft Purview"]},
+   {id:"ai3",t:"Responsible AI & governance",ask:"What policy covers AI use today? Who signs off before a model goes to production?",l1:"No policy or approval path",l3:"Policy drafted, manual review",l5:"Evaluations, content safety and audit built in",rec:"Adopt a Responsible AI baseline: content filters, evaluation gates and a named approval path to production.",w:["Azure AI Content Safety","Foundry evaluations","Microsoft Purview"]},
+   {id:"ai4",t:"AI platform & model access",ask:"Which models and AI services are teams using, and through which subscriptions and networks?",l1:"Shadow use of public tools",l3:"One team with a Foundry project",l5:"Shared AI platform: private networking, quotas, gateway",rec:"Deploy an AI landing zone: Foundry resources and projects, private networking, and an API gateway for quota, routing and chargeback.",w:["Microsoft Foundry","Azure API Management AI gateway","Azure landing zones"]},
+   {id:"ai5",t:"Agent & app engineering",ask:"Have you built anything beyond a chatbot, such as tool-calling or multi-step agents connected to business systems?",l1:"Nothing built yet",l3:"RAG chat proof of concept",l5:"Agents in production acting on business systems",rec:"Prototype one agent end to end on Foundry Agent Service with a real tool integration and a real user group.",w:["Foundry Agent Service","Microsoft Agent Framework","MCP tools","Toolboxes"]},
+   {id:"ai6",t:"Evaluation & LLMOps",ask:"How do you decide an AI answer is good enough, and how is quality and cost watched after launch?",l1:"Manual spot checks",l3:"Test sets, no live monitoring",l5:"Automated evals, tracing, cost and quality dashboards",rec:"Add evaluation datasets and tracing to the delivery pipeline before scaling any use case.",w:["Foundry evaluations","Foundry observability","Azure Monitor"]},
+   {id:"ai7",t:"Skills & operating model",ask:"Who would build and run AI solutions: an internal team, a partner, or both?",l1:"No AI skills in-house",l3:"Small CoE, reliant on partners",l5:"Fusion teams plus an adoption programme",rec:"Tie a skilling plan to the first build and bring in a specialist partner for the pilot.",w:["Microsoft Learn skilling plans","Partner-led pilot"]}
+  ]},
+ {id:"apps", name:"App modernisation", short:"Apps", color:"--p-apps",
+  blurb:"How the application estate is hosted, built and released, and where modernisation would unlock speed, cost or AI.",
+  signals:["Datacentre exit or lease renewal","End-of-support software","VMware licensing change","Slow or risky releases","Developer hiring pressure","Security audit findings"],
+  qs:[
+   {id:"ap1",t:"Portfolio visibility",ask:"How many applications do you run, and do you know which are strategic and which should retire?",l1:"No inventory",l3:"Inventory without business value",l5:"Rationalised portfolio with 6R decisions",rec:"Run discovery plus an application and code assessment to place each workload into a 6R decision.",w:["Azure Migrate","Azure Migrate app & code assessment"]},
+   {id:"ap2",t:"Hosting model",ask:"Where do the core apps run today: on-premises VMs, IaaS, PaaS or containers?",l1:"Mostly on-prem or VMs",l3:"Mix of IaaS and some PaaS",l5:"Mostly managed PaaS and serverless",rec:"Target PaaS for the first wave: App Service for web apps, Container Apps for services, Functions for event work.",w:["Azure App Service","Azure Container Apps","Azure Functions"]},
+   {id:"ap3",t:"Architecture & containers",ask:"Are the key systems monoliths? Is there any container or Kubernetes footprint and a team to run it?",l1:"Tightly coupled monoliths",l3:"Some containers, no platform team",l5:"Modular services on a managed platform",rec:"Pick one monolith and strangle it: extract two or three services onto containers behind an API.",w:["Azure Container Apps","Azure Kubernetes Service","Azure API Management"]},
+   {id:"ap4",t:"DevOps & release",ask:"How long from commit to production, and how often does a release cause an incident?",l1:"Manual, quarterly releases",l3:"CI in place, manual deploys",l5:"Automated CI/CD and IaC, daily deploys",rec:"Standardise CI/CD pipelines and infrastructure-as-code templates the whole estate can reuse.",w:["GitHub Actions","Azure DevOps","Bicep / Terraform"]},
+   {id:"ap5",t:"Developer productivity",ask:"Are developers using AI coding assistants? How big is the upgrade and tech-debt backlog?",l1:"No AI assistance",l3:"Pilot group only",l5:"Broad use with measured impact",rec:"Run a GitHub Copilot pilot with 20 to 50 developers aimed at the upgrade backlog, with before-and-after metrics.",w:["GitHub Copilot","GitHub Copilot app modernization"]},
+   {id:"ap6",t:"App security & resilience",ask:"How are secrets, identities and vulnerabilities handled in the delivery lifecycle?",l1:"Secrets in config, yearly pen test",l3:"Key Vault and scanning in places",l5:"Shift-left scanning, managed identity, tested SLOs",rec:"Shift security left: code and secret scanning in every repo, managed identities by default.",w:["GitHub Advanced Security","Microsoft Defender for Cloud","Azure Key Vault"]}
+  ]},
+ {id:"lowcode", name:"Low-code & Copilot", short:"Copilot", color:"--p-lowcode",
+  blurb:"Microsoft 365 Copilot adoption, Copilot Studio agents and Power Platform, including the data protection that makes them safe to scale.",
+  signals:["Copilot licences bought, low usage","Power Apps sprawl","Service desk overloaded","Paper or email-based processes","Business teams asking for agents"],
+  qs:[
+   {id:"lc1",t:"Microsoft 365 Copilot adoption",ask:"How many Copilot licences are deployed, and what share of those users are active each week?",l1:"No licences",l3:"Pilot group",l5:"Broad rollout, scenarios measured",rec:"Run a scenario-led Copilot pilot across two or three functions with adoption and time-saved metrics.",w:["Microsoft 365 Copilot","Copilot Analytics"]},
+   {id:"lc2",t:"Oversharing & data protection",ask:"Could Copilot surface content people should not see? Are sensitivity labels and DLP in place?",l1:"No labels, broad sharing",l3:"Labels on some content",l5:"Labels, DLP and access reviews",rec:"Run an oversharing assessment and apply labels and DLP before scaling Copilot or agents.",w:["Microsoft Purview","SharePoint Advanced Management"]},
+   {id:"lc3",t:"Agents with Copilot Studio",ask:"Have business teams built agents or bots? Which processes are they asking for?",l1:"None built",l3:"A few experiments",l5:"Governed agent catalogue in production",rec:"Build a first Copilot Studio agent for a high-volume internal question set such as HR, IT or policy.",w:["Copilot Studio","Microsoft 365 Copilot"]},
+   {id:"lc4",t:"Power Platform governance",ask:"Who can create apps and flows? Is there a Centre of Excellence and an environment strategy?",l1:"No governance",l3:"DLP policies, default-environment sprawl",l5:"CoE, managed environments, ALM",rec:"Turn on Managed Environments and deploy the CoE Starter Kit before opening maker access widely.",w:["Power Platform Managed Environments","CoE Starter Kit"]},
+   {id:"lc5",t:"Process automation",ask:"Which manual, repetitive processes consume the most hours each week?",l1:"No view of it",l3:"Some flows in place",l5:"Automation pipeline with tracked savings",rec:"Map the top five manual processes and automate the first with Power Automate, measuring hours returned.",w:["Power Automate","Process mining"]},
+   {id:"lc6",t:"Fusion development",ask:"Do pro-developers and makers work together, for example makers building on APIs that IT publishes?",l1:"Separate worlds",l3:"Occasional collaboration",l5:"Shared connectors, ALM and fusion teams",rec:"Publish two or three core systems as governed custom connectors so makers build on IT-owned APIs.",w:["Azure API Management","Power Platform custom connectors"]}
+  ]},
+ {id:"data", name:"Data & integration", short:"Data", color:"--p-data",
+  blurb:"The data estate, operational databases and integration layer that AI and modern apps depend on.",
+  signals:["Several BI tools in use","Data warehouse renewal due","Regulatory reporting pain","Need for real-time operations","Database licence renewal"],
+  qs:[
+   {id:"dt1",t:"Data estate & analytics",ask:"How many data platforms and warehouses do you run, and whose numbers does the executive team trust?",l1:"Siloed, spreadsheet-driven",l3:"Central warehouse, partial coverage",l5:"Unified lakehouse, one version of truth",rec:"Land priority domains in OneLake and consolidate reporting in Fabric.",w:["Microsoft Fabric","OneLake","Power BI"]},
+   {id:"dt2",t:"Operational databases",ask:"What databases run the core apps, and what version or licensing pressure is coming?",l1:"Self-managed, end-of-support",l3:"Some managed services",l5:"Managed databases matched to workload",rec:"Move end-of-support databases to managed services; use Cosmos DB where scale or AI patterns demand it.",w:["Azure SQL Managed Instance","Azure Database for PostgreSQL","Azure Cosmos DB"]},
+   {id:"dt3",t:"Integration & APIs",ask:"How do systems talk today: point-to-point, an ESB, or managed APIs? Is there an API catalogue?",l1:"Point-to-point",l3:"ESB or some APIs",l5:"Managed API platform with catalogue",rec:"Establish an API platform with a catalogue, shared policies and a developer portal.",w:["Azure API Management","Azure API Center","Logic Apps"]},
+   {id:"dt4",t:"Event-driven & real-time",ask:"Which decisions would change if data arrived in seconds instead of overnight?",l1:"Batch only",l3:"Some streaming",l5:"Event-driven core, real-time analytics",rec:"Introduce eventing for one high-value flow such as orders, telemetry or customer events.",w:["Azure Event Grid","Azure Service Bus","Azure Event Hubs","Fabric Real-Time Intelligence"]},
+   {id:"dt5",t:"Data governance",ask:"Do you know where sensitive data lives, who owns it and how it is classified?",l1:"No catalogue or owners",l3:"Partial classification",l5:"Catalogued, owned, lineage tracked",rec:"Scan and classify the estate and name owners for the data domains AI will depend on.",w:["Microsoft Purview Unified Catalog","Microsoft Purview"]},
+   {id:"dt6",t:"Data for AI",ask:"Could this data feed AI today, with vector search, freshness and per-user access control?",l1:"Not yet",l3:"Some sources, manual pipelines",l5:"AI-ready with vectors and security trimming",rec:"Enable vector search where the data already lives and connect it to the AI platform.",w:["Azure Cosmos DB vector search","Azure AI Search","Azure SQL vector support"]}
+  ]}
+];
+const PMAP = Object.fromEntries(PILLARS.map(p=>[p.id,p]));
+const QMAP = {}; PILLARS.forEach(p=>p.qs.forEach(q=>{QMAP[q.id]=Object.assign({pillar:p.id},q)}));
+
+const TEMPLATES = [
+ {p:"ai",n:"Contact-centre agent assist",d:"Live call summaries, next-best answer, wrap-up notes",v:5,f:4},
+ {p:"ai",n:"Document intake & triage",d:"Extract, classify and route claims, invoices or applications",v:5,f:4},
+ {p:"ai",n:"Enterprise knowledge agent",d:"Grounded answers over policies and procedures",v:4,f:4},
+ {p:"ai",n:"Customer self-service agent",d:"Agent that answers and acts on customer requests",v:5,f:3},
+ {p:"ai",n:"Field technician copilot",d:"Manuals, history and parts lookup on mobile",v:4,f:3},
+ {p:"apps",n:"Customer portal to PaaS",d:"Replatform the web front end onto App Service",v:4,f:4},
+ {p:"apps",n:"Containerise core services",d:"Move .NET or Java services to Container Apps or AKS",v:4,f:3},
+ {p:"apps",n:"AI-assisted .NET / Java upgrade",d:"GitHub Copilot app modernization on legacy code",v:3,f:5},
+ {p:"apps",n:"Mainframe or batch offload",d:"Re-engineer batch jobs as cloud services",v:4,f:2},
+ {p:"lowcode",n:"HR & IT helpdesk agent",d:"Copilot Studio agent in Teams for common requests",v:3,f:5},
+ {p:"lowcode",n:"Approvals automation",d:"Power Automate for approvals now handled by email",v:3,f:5},
+ {p:"lowcode",n:"Copilot for a priority function",d:"Scenario-led M365 Copilot rollout, e.g. finance or sales",v:4,f:4},
+ {p:"lowcode",n:"Field inspection app",d:"Power Apps with offline capture and photos",v:3,f:4},
+ {p:"data",n:"Unified analytics in Fabric",d:"Consolidate warehouses and reports on OneLake",v:4,f:3},
+ {p:"data",n:"Real-time operations view",d:"Streaming telemetry or orders into live dashboards",v:4,f:3},
+ {p:"data",n:"API-first integration layer",d:"Replace point-to-point links with managed APIs",v:4,f:3},
+ {p:"data",n:"Database modernisation",d:"End-of-support SQL or Oracle to managed services",v:3,f:4}
+];
+
+const INDUSTRIES=["Financial services","Insurance","Healthcare","Government","Retail","Manufacturing","Telecommunications","Energy & utilities","Education","Transport & logistics","Media & entertainment","Other"];
+const SIZES=["Under 500 employees","500 – 2,000","2,000 – 10,000","10,000+"];
+const STRATEGY=["On-premises first","Hybrid","Cloud-first","Multi-cloud"];
+const STAKE=["CIO / CTO","Head of Data / CDO","Chief Digital Officer","Enterprise architect","App & dev leads","Security & risk","Business unit leader","Procurement / finance"];
+const FOOT=["Microsoft 365 E3","Microsoft 365 E5","Microsoft 365 Copilot","Azure (active consumption)","Azure commitment (MACC)","GitHub Enterprise","Power Platform","Dynamics 365","Fabric / Power BI"];
+const PRIOS=["Reduce cost to serve","Grow revenue","Improve customer experience","Employee productivity","Risk & compliance","Reduce tech debt","Speed to market","Sustainability"];
+
+const STAGES=[
+ {id:"setup",label:"Engagement",kind:"setup"},
+ {id:"priorities",label:"Business outcomes",kind:"priorities"},
+ ...PILLARS.map(p=>({id:p.id,label:p.name,kind:"pillar"})),
+ {id:"usecases",label:"Use-case map",kind:"usecases"},
+ {id:"summary",label:"Readout",kind:"summary"}
+];
+
+/* ---------- State ---------- */
+const KEY="cse-discovery-v1";
+function today(){const d=new Date();return d.toISOString().slice(0,10)}
+function blank(){return {v:1,sample:false,meta:{customer:"",industry:"",size:"",strategy:"",date:today(),cse:"",stakeholders:[],footprint:[]},priorities:[],pains:"",initiatives:"",scores:{},notes:{},signals:{},usecases:[],stage:"setup",seq:1}}
+function sample(){
+  return {v:1,sample:true,
+   meta:{customer:"Kōwhai Health (sample)",industry:"Insurance",size:"2,000 – 10,000",strategy:"Hybrid",date:today(),cse:"",stakeholders:["CIO / CTO","Head of Data / CDO","Enterprise architect","Business unit leader"],footprint:["Microsoft 365 E5","Microsoft 365 Copilot","Azure (active consumption)","Power Platform"]},
+   priorities:["Reduce cost to serve","Improve customer experience","Reduce tech debt"],
+   pains:"Claims take 9 days on average end to end. About 40% of contact-centre calls are members asking for claim status. The member portal is a .NET Framework 4.6 monolith on VMware with quarterly releases.",
+   initiatives:"Datacentre lease ends Q3 2027. The board has asked for an AI plan by March. 300 Copilot licences bought in May; usage is low.",
+   scores:{ai1:3,ai2:2,ai3:2,ai4:2,ai5:1,ai6:1,ai7:2,ap1:2,ap2:1,ap3:2,ap4:2,ap5:2,ap6:3,lc1:2,lc2:1,lc3:2,lc4:3,lc5:2,dt1:2,dt2:2,dt3:3,dt4:1,dt5:2},
+   notes:{ai:"Two teams already use Azure OpenAI in a sandbox subscription. There is no approval path to production.",apps:"About 140 apps; roughly 30 are member-facing. VMware renewal quote arrived last month.",lowcode:"Copilot users say answers pull in old policy drafts from SharePoint.",data:"Claims data sits in an on-prem SQL Server 2014 warehouse plus Excel extracts for fraud."},
+   signals:{ai:["Board is asking for an AI plan","Contact-centre cost pressure","Existing Azure OpenAI proof of concept"],apps:["Datacentre exit or lease renewal","VMware licensing change","End-of-support software"],lowcode:["Copilot licences bought, low usage"],data:["Regulatory reporting pain"]},
+   usecases:[
+    {id:1,name:"Claims document intake & triage",pillar:"ai",value:5,feas:4},
+    {id:2,name:"Claim-status agent for members",pillar:"ai",value:5,feas:3},
+    {id:3,name:"Member portal to App Service + Container Apps",pillar:"apps",value:4,feas:3},
+    {id:4,name:"AI-assisted .NET upgrade with GitHub Copilot",pillar:"apps",value:3,feas:5},
+    {id:5,name:"HR & IT helpdesk agent in Copilot Studio",pillar:"lowcode",value:3,feas:5},
+    {id:6,name:"Claims data into Fabric for fraud analytics",pillar:"data",value:4,feas:2}
+   ],stage:"setup",seq:7};
+}
+let S;
+try{const raw=localStorage.getItem(KEY); S=raw?JSON.parse(raw):null}catch(e){S=null}
+if(!S||S.v!==1) S=sample();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ---------- Helpers ---------- */
+const $=s=>document.querySelector(s);
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function pcol(id){return "var("+PMAP[id].color+")"}
+function pillarScore(pid){const qs=PMAP[pid].qs;const vals=qs.map(q=>S.scores[q.id]).filter(Boolean);return {avg:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null,n:vals.length,total:qs.length}}
+function level(avg){if(avg==null)return{t:"Not assessed",c:0};if(avg<2)return{t:"Exploring",c:1};if(avg<3)return{t:"Emerging",c:2};if(avg<4)return{t:"Scaling",c:3};return{t:"Leading",c:4}}
+function quadrant(u){const hv=u.value>=3,hf=u.feas>=3; if(hv&&hf)return"Quick win"; if(hv)return"Strategic bet"; if(hf)return"Fill-in"; return"Park"}
+function totalQs(){return PILLARS.reduce((a,p)=>a+p.qs.length,0)}
+function answered(){return Object.keys(S.scores).filter(k=>S.scores[k]&&QMAP[k]).length}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2200)}
+function stageProgress(st){
+  if(st.kind==="setup"){const m=S.meta;const n=[m.customer,m.industry,m.size,m.stakeholders.length,m.footprint.length].filter(Boolean).length;return{t:n+"/5",done:n===5}}
+  if(st.kind==="priorities"){return{t:S.priorities.length+"/3",done:S.priorities.length===3}}
+  if(st.kind==="pillar"){const s=pillarScore(st.id);return{t:s.n+"/"+s.total,done:s.n===s.total}}
+  if(st.kind==="usecases"){return{t:String(S.usecases.length),done:S.usecases.length>=3}}
+  return{t:"",done:false};
+}
+
+/* ---------- Shell ---------- */
+function renderMeter(){
+  const a=answered(),t=totalQs();
+  $("#meter").innerHTML='<span>Coverage</span><div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="'+t+'" aria-valuenow="'+a+'"><div class="fill" style="width:'+(a/t*100)+'%"></div></div><span>'+a+" / "+t+" questions</span>";
+}
+function renderRail(){
+  let h='<div class="cust"><b>'+esc(S.meta.customer||"New customer")+"</b>"+esc([S.meta.industry,S.meta.date].filter(Boolean).join(" · "))+"</div>";
+  STAGES.forEach((st,i)=>{
+    const pr=stageProgress(st);
+    if(st.id==="usecases")h+="<hr>";
+    const lead=st.kind==="pillar"?'<span class="dot" style="background:'+pcol(st.id)+'"></span>':'<span class="n">'+String(i+1).padStart(2,"0")+"</span>";
+    h+='<button class="step" data-go="'+st.id+'"'+(S.stage===st.id?' aria-current="step"':"")+">"+lead+'<span class="lbl">'+esc(st.label)+'</span><span class="cnt'+(pr.done?" done":"")+'">'+pr.t+"</span></button>";
+  });
+  $("#rail").innerHTML=h;
+  renderMeter();
+}
+function navRow(){
+  const i=STAGES.findIndex(s=>s.id===S.stage);
+  const prev=STAGES[i-1],next=STAGES[i+1];
+  return '<div class="navrow">'+(prev?'<button class="btn" data-go="'+prev.id+'">← '+esc(prev.label)+"</button>":"<span></span>")+(next?'<button class="btn pri" data-go="'+next.id+'">'+esc(next.label)+" →</button>":"")+"</div>";
+}
+function banner(){
+  if(!S.sample)return"";
+  return '<div class="banner"><span><b>Sample data.</b> Kōwhai Health is a fictional insurer, loaded so you can see a completed discovery.</span><button class="btn sm" data-act="new">Start a new discovery</button></div>';
+}
+function render(){
+  const st=STAGES.find(s=>s.id===S.stage)||STAGES[0];
+  let h=banner();
+  if(st.kind==="setup")h+=vSetup();
+  else if(st.kind==="priorities")h+=vPriorities();
+  else if(st.kind==="pillar")h+=vPillar(PMAP[st.id]);
+  else if(st.kind==="usecases")h+=vUsecases();
+  else h+=vSummary();
+  if(st.kind!=="summary")h+=navRow();
+  $("#main").innerHTML=h;
+  renderRail();
+}
+
+/* ---------- Views ---------- */
+function sel(id,path,opts,val){return '<select id="'+id+'" data-bind="'+path+'"><option value="">Select…</option>'+opts.map(o=>'<option'+(o===val?" selected":"")+">"+esc(o)+"</option>").join("")+"</select>"}
+function chipList(path,opts,vals){return '<div class="chips">'+opts.map(o=>'<button class="chip" data-list="'+path+'" data-val="'+esc(o)+'" aria-pressed="'+(vals.includes(o))+'">'+esc(o)+"</button>").join("")+"</div>"}
+
+function vSetup(){
+  const m=S.meta;
+  return '<div class="head"><div class="eyebrow">Stage 01 · Before the workshop</div><h2>Engagement</h2><p>Capture who you are meeting and what they already own. The Microsoft footprint shapes which motions and investment conversations fit.</p></div>'+
+  '<div class="panel stack">'+
+   '<div class="grid2">'+
+    '<div class="field"><label for="f-cust">Customer</label><input type="text" id="f-cust" data-bind="meta.customer" value="'+esc(m.customer)+'" placeholder="e.g. Contoso Health"></div>'+
+    '<div class="field"><label for="f-date">Workshop date</label><input type="date" id="f-date" data-bind="meta.date" value="'+esc(m.date)+'"></div>'+
+    '<div class="field"><label for="f-ind">Industry</label>'+sel("f-ind","meta.industry",INDUSTRIES,m.industry)+'</div>'+
+    '<div class="field"><label for="f-size">Organisation size</label>'+sel("f-size","meta.size",SIZES,m.size)+'</div>'+
+    '<div class="field"><label for="f-strat">Cloud posture</label>'+sel("f-strat","meta.strategy",STRATEGY,m.strategy)+'</div>'+
+    '<div class="field"><label for="f-cse">Solution engineer</label><input type="text" id="f-cse" data-bind="meta.cse" value="'+esc(m.cse)+'" placeholder="Your name"></div>'+
+   '</div>'+
+   '<div class="field"><span class="lab">Stakeholders in the room</span>'+chipList("meta.stakeholders",STAKE,m.stakeholders)+'</div>'+
+   '<div class="field"><span class="lab">Current Microsoft footprint</span>'+chipList("meta.footprint",FOOT,m.footprint)+'<span class="hint">An active Azure commitment or existing Copilot licences usually changes which first motion makes sense.</span></div>'+
+  '</div>';
+}
+function vPriorities(){
+  const full=S.priorities.length>=3;
+  return '<div class="head"><div class="eyebrow">Stage 02 · Why now</div><h2>Business outcomes</h2><p>Anchor every technical conversation to an outcome the sponsor cares about. Pick the top three in order; the first pick carries the most weight in the readout.</p></div>'+
+  '<div class="panel stack">'+
+   '<div class="field"><span class="lab">Top three priorities, in order</span><div class="chips">'+
+    PRIOS.map(o=>{const i=S.priorities.indexOf(o);return '<button class="chip rank'+(full&&i<0?" dim":"")+'" data-prio="'+esc(o)+'" aria-pressed="'+(i>=0)+'">'+(i>=0?'<span class="rk">#'+(i+1)+"</span>":"")+esc(o)+"</button>"}).join("")+
+   '</div><span class="hint">Tap a selected priority to remove it.</span></div>'+
+   '<div class="field"><label for="f-pains">Pain points, in their words</label><textarea id="f-pains" data-bind="pains" placeholder="Numbers help: hours lost, days to resolve, cost per call…">'+esc(S.pains)+'</textarea></div>'+
+   '<div class="field"><label for="f-init">Deadlines, initiatives and triggers</label><textarea id="f-init" data-bind="initiatives" placeholder="Contract renewals, datacentre exits, board asks, regulatory dates…">'+esc(S.initiatives)+'</textarea></div>'+
+  '</div>';
+}
+function vPillar(p){
+  const s=pillarScore(p.id),lv=level(s.avg);
+  const idx=STAGES.findIndex(x=>x.id===p.id)+1;
+  let qh="";
+  p.qs.forEach(q=>{
+    const v=S.scores[q.id]||0;
+    qh+='<div class="q" id="q-'+q.id+'"><div class="qtop"><h3>'+esc(q.t)+'</h3><span class="qid">'+q.id.toUpperCase()+'</span></div>'+
+      '<p class="ask">'+esc(q.ask)+'</p>'+
+      '<div class="scale" role="group" aria-label="Maturity for '+esc(q.t)+'">'+[1,2,3,4,5].map(n=>'<button class="sc" data-q="'+q.id+'" data-v="'+n+'" aria-pressed="'+(v===n)+'">'+n+"</button>").join("")+'</div>'+
+      '<div class="anchors"><span><b>1</b>'+esc(q.l1)+'</span><span><b>3</b>'+esc(q.l3)+'</span><span><b>5</b>'+esc(q.l5)+'</span></div></div>';
+  });
+  return '<div class="head"><div class="eyebrow"><span class="sw" style="background:'+pcol(p.id)+'"></span>Stage '+String(idx).padStart(2,"0")+' · Assess</div>'+
+   '<div class="pillhead"><h2>'+esc(p.name)+'</h2><div class="scorebig" id="pscore"><b>'+(s.avg==null?"–":s.avg.toFixed(1))+'</b><span>/ 5 · '+s.n+' of '+s.total+'</span> <span class="tag lv-'+lv.c+'">'+lv.t+'</span></div></div><p>'+esc(p.blurb)+'</p></div>'+
+   '<div class="stack">'+
+    '<div class="panel"><div class="field"><span class="lab">Signals heard</span>'+chipList("signals."+p.id,p.signals,S.signals[p.id]||[])+'</div></div>'+
+    '<div class="panel"><div class="sectitle"><h3>Maturity</h3><span class="muted">Score what you hear, not what they hope. Tap again to clear.</span></div>'+qh+'</div>'+
+    '<div class="panel"><div class="field"><label for="n-'+p.id+'">Notes and follow-ups</label><textarea id="n-'+p.id+'" data-bind="notes.'+p.id+'" placeholder="Quotes, numbers, names, open questions…">'+esc(S.notes[p.id]||"")+'</textarea></div></div>'+
+   '</div>';
+}
+function matrixSVG(list,small){
+  const W=440,H=330,L=54,R=424,T=16,B=286;
+  const X=f=>L+(f-1)/4*(R-L), Y=v=>B-(v-1)/4*(B-T);
+  const mx=X(3),my=Y(3);
+  let g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Value versus feasibility matrix">';
+  g+='<rect x="'+mx+'" y="'+T+'" width="'+(R-mx)+'" height="'+(my-T)+'" fill="var(--accent-soft)"/>';
+  g+='<rect x="'+L+'" y="'+T+'" width="'+(R-L)+'" height="'+(B-T)+'" fill="none" stroke="var(--line)"/>';
+  [1,2,3,4,5].forEach(i=>{
+    g+='<line x1="'+X(i)+'" x2="'+X(i)+'" y1="'+T+'" y2="'+B+'" stroke="var(--line-2)"/>';
+    g+='<line y1="'+Y(i)+'" y2="'+Y(i)+'" x1="'+L+'" x2="'+R+'" stroke="var(--line-2)"/>';
+    g+='<text x="'+X(i)+'" y="'+(B+16)+'" text-anchor="middle" font-size="11" font-family="IBM Plex Mono,monospace" fill="var(--ink-3)">'+i+'</text>';
+    g+='<text x="'+(L-10)+'" y="'+(Y(i)+4)+'" text-anchor="end" font-size="11" font-family="IBM Plex Mono,monospace" fill="var(--ink-3)">'+i+'</text>';
+  });
+  g+='<line x1="'+L+'" x2="'+R+'" y1="'+my+'" y2="'+my+'" stroke="var(--ink-3)" stroke-dasharray="4 4" opacity=".5"/><line x1="'+mx+'" x2="'+mx+'" y1="'+T+'" y2="'+B+'" stroke="var(--ink-3)" stroke-dasharray="4 4" opacity=".5"/>';
+  const ql=(x,y,t,a)=>'<text x="'+x+'" y="'+y+'" text-anchor="'+a+'" font-size="11" font-weight="600" font-family="IBM Plex Mono,monospace" fill="var(--ink-3)" letter-spacing=".06em">'+t+'</text>';
+  g+=ql(R-8,T+16,"QUICK WINS","end")+ql(L+8,T+16,"STRATEGIC BETS","start")+ql(R-8,B-8,"FILL-INS","end")+ql(L+8,B-8,"PARK","start");
+  g+='<text x="'+((L+R)/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="11.5" fill="var(--ink-2)" font-family="IBM Plex Sans,sans-serif">Feasibility →</text>';
+  g+='<text transform="translate(14 '+((T+B)/2)+') rotate(-90)" text-anchor="middle" font-size="11.5" fill="var(--ink-2)" font-family="IBM Plex Sans,sans-serif">Business value →</text>';
+  const groups={};
+  list.forEach((u,i)=>{const k=u.value+"_"+u.feas;(groups[k]=groups[k]||[]).push([u,i])});
+  Object.values(groups).forEach(arr=>{
+    arr.forEach(([u,i],j)=>{
+      let dx=0,dy=0; if(arr.length>1){const a=(j/arr.length)*Math.PI*2-Math.PI/2;dx=Math.cos(a)*15;dy=Math.sin(a)*15}
+      const cx=Math.min(R-12,Math.max(L+12,X(u.feas)+dx)),cy=Math.min(B-12,Math.max(T+12,Y(u.value)+dy));
+      g+='<g><title>'+esc(u.name)+'</title><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="'+pcol(u.pillar)+'" stroke="var(--surface)" stroke-width="2"/><text x="'+cx+'" y="'+(cy+4)+'" text-anchor="middle" font-size="11" font-weight="600" font-family="IBM Plex Mono,monospace" fill="var(--surface)">'+(i+1)+'</text></g>';
+    });
+  });
+  return g+"</svg>";
+}
+function legend(){return '<div class="legend">'+PILLARS.map(p=>'<span><i style="background:'+pcol(p.id)+'"></i>'+esc(p.name)+"</span>").join("")+"</div>"}
+function vUsecases(){
+  const opts=(v)=>[1,2,3,4,5].map(n=>'<option'+(n===v?" selected":"")+">"+n+"</option>").join("");
+  const existing=new Set(S.usecases.map(u=>u.name.toLowerCase()));
+  let rows=S.usecases.map((u,i)=>'<tr><td><span class="idx" style="background:'+pcol(u.pillar)+'">'+(i+1)+'</span></td><td>'+esc(u.name)+'<div class="muted">'+esc(PMAP[u.pillar].name)+' · '+quadrant(u)+'</div></td>'+
+    '<td><select aria-label="Value" data-uc="'+u.id+'" data-f="value">'+opts(u.value)+'</select></td><td><select aria-label="Feasibility" data-uc="'+u.id+'" data-f="feas">'+opts(u.feas)+'</select></td>'+
+    '<td><button class="btn sm danger" data-del="'+u.id+'" aria-label="Remove '+esc(u.name)+'">Remove</button></td></tr>').join("");
+  const table=S.usecases.length?'<div class="tblwrap"><table><thead><tr><th>#</th><th>Use case</th><th>Value</th><th>Feasibility</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">No use cases yet. Add one above or pick from the library.</div>';
+  const lib=PILLARS.map(p=>'<div class="field"><span class="lab">'+esc(p.name)+'</span><div class="tpls">'+TEMPLATES.filter(t=>t.p===p.id).map(t=>{const has=existing.has(t.n.toLowerCase());return '<button class="tpl" data-tpl="'+esc(t.n)+'"'+(has?" disabled":"")+'><span class="sw" style="background:'+pcol(p.id)+'"></span><span><b>'+esc(t.n)+'</b><span>'+esc(t.d)+'</span></span><i>'+(has?"Added":"+ Add")+'</i></button>'}).join("")+'</div></div>').join("");
+  return '<div class="head"><div class="eyebrow">Stage 07 · Prioritise</div><h2>Use-case map</h2><p>List the ideas the customer raised, then score each for business value and feasibility (data, skills, integration effort). High-high is where the first proof of value should come from.</p></div>'+
+  '<div class="stack">'+
+   '<div class="panel"><h3 class="sec">Add a use case</h3><div class="ucform">'+
+     '<div class="field f-name"><label for="uc-name">Name</label><input type="text" id="uc-name" placeholder="e.g. Claims document intake"></div>'+
+     '<div class="field"><label for="uc-p">Area</label><select id="uc-p">'+PILLARS.map(p=>'<option value="'+p.id+'">'+esc(p.name)+"</option>").join("")+'</select></div>'+
+     '<div class="field"><label for="uc-v">Value</label><select id="uc-v">'+opts(3)+'</select></div>'+
+     '<div class="field"><label for="uc-f">Feasibility</label><select id="uc-f">'+opts(3)+'</select></div>'+
+     '<button class="btn pri" data-act="adduc">Add</button>'+
+   '</div></div>'+
+   '<div class="split"><div class="panel matrix"><div class="sectitle"><h3>Value × feasibility</h3></div>'+matrixSVG(S.usecases)+legend()+'</div>'+
+   '<div class="panel">'+table+'</div></div>'+
+   '<div class="panel"><div class="sectitle"><h3>Use-case library</h3><span class="muted">Common patterns to prompt the conversation. Adjust scores after adding.</span></div><div class="grid2">'+lib+'</div></div>'+
+  '</div>';
+}
+
+/* ---------- Readout logic ---------- */
+function compute(){
+  const ps=PILLARS.map(p=>Object.assign({p},pillarScore(p.id)));
+  const recs=[];
+  PILLARS.forEach(p=>p.qs.forEach(q=>{const v=S.scores[q.id];if(v&&v<=3)recs.push({q,p,v})}));
+  recs.sort((a,b)=>a.v-b.v);
+  const uc=S.usecases.map((u,i)=>Object.assign({i:i+1,q:quadrant(u),score:u.value*u.feas},u)).sort((a,b)=>b.score-a.score||b.value-a.value);
+  const quick=uc.filter(u=>u.q==="Quick win");
+  const sc=id=>S.scores[id]||0, avg=id=>pillarScore(id).avg;
+  const M=[];
+  const aiA=avg("ai");
+  if(aiA!=null&&aiA<2.5)M.push({n:"AI envisioning & design-thinking workshop",w:"AI maturity is early. Align the sponsor on outcomes, guardrails and a shortlist before building."});
+  const topAI=quick.find(u=>u.pillar==="ai");
+  if(topAI)M.push({n:"Rapid prototype / proof of value (2–4 weeks)",w:"Build “"+topAI.name+"” on Foundry with real data and users, with success criteria agreed up front."});
+  if((sc("ai3")&&sc("ai3")<=2)||(sc("ai4")&&sc("ai4")<=2))M.push({n:"AI landing zone & Responsible AI baseline",w:"Platform and governance gaps will block production. Land these alongside the first prototype, not after it."});
+  const apA=avg("apps");
+  if(apA!=null&&apA<3)M.push({n:"App & code assessment with a migration business case",w:"Hosting and release maturity are low. Quantify the estate and build the case around the triggers you heard."});
+  if(sc("ap5")&&sc("ap5")<=3)M.push({n:"GitHub Copilot pilot or modernisation hackathon",w:"Aim AI-assisted development at the upgrade backlog and measure cycle-time change."});
+  if(sc("lc2")&&sc("lc2")<=2)M.push({n:"Copilot readiness & oversharing assessment",w:"Data protection gaps put Copilot and agent rollout at risk. Fix permissions and labels first."});
+  if(sc("lc3")&&sc("lc3")<=3)M.push({n:"Copilot Studio agent build day",w:"Business teams can ship a governed first agent quickly, which builds momentum for the wider programme."});
+  const dtA=avg("data");
+  if(dtA!=null&&dtA<3)M.push({n:"Data estate assessment (Fabric)",w:"Fragmented data will cap AI quality. Map the domains AI use cases depend on and plan the path into OneLake."});
+  M.push({n:"Confirm funding & programme eligibility",w:"Check current Microsoft investment programmes (for example Azure Accelerate) and partner funding with the account team before scoping."});
+  return {ps,recs,uc,quick,motions:M};
+}
+function planItems(c){
+  const top=c.quick[0]||c.uc[0];
+  const d30=["Play back this readout to the sponsor and confirm the top three outcomes",(c.motions[0]?"Schedule: "+c.motions[0].n:"Agree the first engagement"),top?"Confirm data access and owners for “"+top.name+"”":"Shortlist two or three use cases with the business"];
+  const d60=[top?"Build and test “"+top.name+"” with a named user group":"Run a prototype on the highest-value use case","Stand up the landing zone and guardrails the prototype needs","Collect baseline metrics for the business case"];
+  const d90=["Present results and business case to the sponsor","Agree the production path, owners and support model","Line up the next two use cases from the map"];
+  return [d30,d60,d90];
+}
+function vSummary(){
+  const c=compute(),m=S.meta;
+  const ticks=[1,2,3,4,5].map(i=>'<span style="left:'+(i/5*100)+'%">'+i+"</span>").join("");
+  const bars=c.ps.map(x=>{const lv=level(x.avg);return '<div class="bar"><span class="nm">'+esc(x.p.name)+'<br><span class="tag lv-'+lv.c+'" style="margin-top:4px">'+lv.t+'</span></span><div class="tr">'+(x.avg!=null?'<div class="fl" style="width:'+(x.avg/5*100)+'%;background:'+pcol(x.p.id)+'"></div>':"")+'</div><span class="v">'+(x.avg==null?"–":x.avg.toFixed(1))+"</span></div>"}).join("");
+  const recsBy=PILLARS.map(p=>{const r=c.recs.filter(x=>x.p.id===p.id).slice(0,3);if(!r.length)return"";return r.map(x=>'<div class="rec"><span class="stripe" style="background:'+pcol(p.id)+'"></span><div><h4>'+esc(x.q.t)+' <span class="tag lv-'+(x.v<=2?1:2)+'">'+(x.v<=2?"Gap":"Build")+" · "+x.v+'/5</span></h4><p>'+esc(x.q.rec)+'</p><div class="prod">'+x.q.w.map(w=>"<span>"+esc(w)+"</span>").join("")+"</div></div></div>").join("")}).join("");
+  const plan=planItems(c);
+  const ucList=c.uc.slice(0,5).map(u=>'<tr><td><span class="idx" style="background:'+pcol(u.pillar)+'">'+u.i+'</span></td><td>'+esc(u.name)+'</td><td class="nw">'+u.q+'</td><td class="num">'+u.value+" × "+u.feas+"</td></tr>").join("");
+  const sigs=PILLARS.flatMap(p=>(S.signals[p.id]||[]));
+  return '<div class="head"><div class="eyebrow">Stage 08 · Play back</div><h2>Readout for '+esc(m.customer||"this customer")+'</h2><p>Generated from the scores, signals and use cases captured. Review it, then copy it into your follow-up email, account plan or opportunity notes.</p></div>'+
+  '<div class="stack">'+
+   '<div class="panel"><div class="kv"><div>Industry<b>'+esc(m.industry||"–")+'</b></div><div>Size<b>'+esc(m.size||"–")+'</b></div><div>Cloud posture<b>'+esc(m.strategy||"–")+'</b></div><div>Date<b>'+esc(m.date||"–")+'</b></div></div>'+
+    (S.priorities.length?'<div style="margin-top:14px" class="field"><span class="lab">Priorities</span><div class="chips">'+S.priorities.map((p,i)=>'<span class="chip rank" aria-pressed="true"><span class="rk">#'+(i+1)+"</span>"+esc(p)+"</span>").join("")+"</div></div>":"")+
+    (sigs.length?'<div style="margin-top:14px" class="field"><span class="lab">Signals heard</span><div class="chips">'+sigs.map(s=>'<span class="chip">'+esc(s)+"</span>").join("")+"</div></div>":"")+
+   '</div>'+
+   '<div class="split">'+
+    '<div class="panel"><h3 class="sec">Readiness by area</h3><div class="bars">'+bars+'<div class="axis"><span></span><div class="ticks">'+ticks+'</div><span></span></div></div><p class="muted" style="margin:14px 0 0">Average of answered questions on a 1–5 scale. Exploring &lt;2 · Emerging 2–3 · Scaling 3–4 · Leading 4+.</p></div>'+
+    '<div class="panel matrix"><h3 class="sec">Use-case priorities</h3>'+(c.uc.length?matrixSVG(S.usecases)+'<div class="tblwrap" style="margin-top:8px"><table><thead><tr><th>#</th><th>Top use cases</th><th>Quadrant</th><th>V × F</th></tr></thead><tbody>'+ucList+"</tbody></table></div>":'<div class="empty">Add use cases on the map to rank them here.</div>')+'</div>'+
+   '</div>'+
+   '<div class="panel"><div class="sectitle"><h3>Recommended engagements</h3><span class="muted">Ordered by what unblocks the most</span></div><div class="motions">'+c.motions.map(x=>'<div class="motion"><b>'+esc(x.n)+'</b><span>'+esc(x.w)+"</span></div>").join("")+'</div></div>'+
+   '<div class="panel"><div class="sectitle"><h3>Gaps and recommended solutions</h3><span class="muted">Questions scored 3 or below, up to three per area, weakest first</span></div><div class="recs">'+(recsBy||'<div class="empty">Score the assessment areas to generate recommendations.</div>')+'</div></div>'+
+   '<div class="panel"><h3 class="sec">30 / 60 / 90 days</h3><div class="plan">'+["Next 30 days","Days 31–60","Days 61–90"].map((t,i)=>"<div><h4>"+t+"</h4><ul>"+plan[i].map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul></div>").join("")+'</div></div>'+
+   '<div class="panel stack"><h3 class="sec" style="margin:0">Share and save</h3>'+
+    '<div class="actions"><button class="btn pri" data-act="copymd">Copy readout (Markdown)</button><button class="btn" data-act="copyjson">Copy session data</button><button class="btn" data-act="showimport">Load a saved session</button><button class="btn danger" data-act="new">New discovery</button></div>'+
+    '<div id="io"></div>'+
+    '<p class="muted" style="margin:0">Your current discovery autosaves in this browser only. To keep a customer session or move it to another device, copy the session data and paste it back in later.</p>'+
+   '</div>'+
+  '</div>';
+}
+function markdown(){
+  const c=compute(),m=S.meta,plan=planItems(c);
+  let o="# Discovery readout: "+(m.customer||"Customer")+"\n\n";
+  o+="**Date:** "+(m.date||"–")+"  \n**Industry:** "+(m.industry||"–")+" · **Size:** "+(m.size||"–")+" · **Cloud posture:** "+(m.strategy||"–")+"  \n";
+  if(m.stakeholders.length)o+="**Stakeholders:** "+m.stakeholders.join(", ")+"  \n";
+  if(m.footprint.length)o+="**Microsoft footprint:** "+m.footprint.join(", ")+"  \n";
+  if(m.cse)o+="**Solution engineer:** "+m.cse+"  \n";
+  o+="\n## Business outcomes\n"+(S.priorities.length?S.priorities.map((p,i)=>(i+1)+". "+p).join("\n"):"Not captured")+"\n";
+  if(S.pains)o+="\n**Pain points:** "+S.pains+"\n";
+  if(S.initiatives)o+="\n**Triggers and deadlines:** "+S.initiatives+"\n";
+  o+="\n## Readiness (1–5)\n| Area | Score | Level |\n|---|---|---|\n";
+  c.ps.forEach(x=>{o+="| "+x.p.name+" | "+(x.avg==null?"–":x.avg.toFixed(1))+" | "+level(x.avg).t+" |\n"});
+  PILLARS.forEach(p=>{const s=S.signals[p.id]||[],n=S.notes[p.id];if(s.length||n){o+="\n**"+p.name+"**"+(s.length?" — signals: "+s.join("; "):"")+"\n";if(n)o+="> "+n.replace(/\n/g,"\n> ")+"\n"}});
+  if(c.uc.length){o+="\n## Prioritised use cases\n| # | Use case | Area | Value | Feasibility | Quadrant |\n|---|---|---|---|---|---|\n";c.uc.forEach(u=>{o+="| "+u.i+" | "+u.name+" | "+PMAP[u.pillar].name+" | "+u.value+" | "+u.feas+" | "+u.q+" |\n"})}
+  o+="\n## Recommended engagements\n"+c.motions.map(x=>"- **"+x.n+"** — "+x.w).join("\n")+"\n";
+  if(c.recs.length){o+="\n## Gaps and recommended solutions\n";PILLARS.forEach(p=>{const r=c.recs.filter(x=>x.p.id===p.id).slice(0,3);if(r.length){o+="\n### "+p.name+"\n";r.forEach(x=>{o+="- **"+x.q.t+" ("+x.v+"/5):** "+x.q.rec+" _"+x.q.w.join(", ")+"_\n"})}})}
+  o+="\n## 30 / 60 / 90 days\n";["Next 30 days","Days 31–60","Days 61–90"].forEach((t,i)=>{o+="\n**"+t+"**\n"+plan[i].map(x=>"- "+x).join("\n")+"\n"});
+  return o;
+}
+function copyText(txt,label){
+  const fallback=()=>{$("#io").innerHTML='<div class="field"><label for="io-t">Select all and copy</label><textarea id="io-t" style="min-height:200px">'+esc(txt)+"</textarea></div>";const t=$("#io-t");t.focus();t.select()};
+  try{navigator.clipboard.writeText(txt).then(()=>toast(label+" copied")).catch(fallback)}catch(e){fallback()}
+}
+function loadSession(txt){
+  try{const d=JSON.parse(txt);if(!d||d.v!==1||!d.meta||!d.scores)throw 0;S=Object.assign(blank(),d);S.sample=false;S.stage="summary";save();render();toast("Session loaded");return true}catch(e){return false}
+}
+
+/* ---------- Events ---------- */
+function setPath(path,val){const parts=path.split(".");let o=S;for(let i=0;i<parts.length-1;i++){o[parts[i]]=o[parts[i]]||{};o=o[parts[i]]}o[parts[parts.length-1]]=val}
+function getPath(path){return path.split(".").reduce((o,k)=>o==null?o:o[k],S)}
+document.addEventListener("input",e=>{
+  const b=e.target.closest("[data-bind]");if(!b)return;
+  setPath(b.dataset.bind,b.value);save();
+  if(b.dataset.bind.startsWith("meta."))renderRail();
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.dataset.bind){setPath(t.dataset.bind,t.value);save();renderRail();return}
+  if(t.dataset.uc){const u=S.usecases.find(x=>x.id==t.dataset.uc);if(u){u[t.dataset.f]=+t.value;save();render()}return}
+  if(t.id==="io-file"&&t.files&&t.files[0]){const r=new FileReader();r.onload=()=>{if(!loadSession(r.result))toast("That file isn't a saved discovery session")};r.readAsText(t.files[0])}
+});
+document.addEventListener("click",e=>{
+  const el=e.target.closest("button");if(!el)return;
+  if(el.dataset.go){S.stage=el.dataset.go;save();render();window.scrollTo({top:0});return}
+  if(el.dataset.q){
+    const q=el.dataset.q,v=+el.dataset.v;
+    S.scores[q]=S.scores[q]===v?0:v; if(!S.scores[q])delete S.scores[q]; save();
+    el.parentElement.querySelectorAll(".sc").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.v===S.scores[q])));
+    const p=QMAP[q].pillar,s=pillarScore(p),lv=level(s.avg);
+    $("#pscore").innerHTML='<b>'+(s.avg==null?"–":s.avg.toFixed(1))+'</b><span>/ 5 · '+s.n+' of '+s.total+'</span> <span class="tag lv-'+lv.c+'">'+lv.t+"</span>";
+    renderRail();return;
+  }
+  if(el.dataset.list){
+    const arr=getPath(el.dataset.list)||[];const v=el.dataset.val;const i=arr.indexOf(v);
+    if(i>=0)arr.splice(i,1);else arr.push(v);setPath(el.dataset.list,arr);save();
+    el.setAttribute("aria-pressed",String(i<0));renderRail();return;
+  }
+  if(el.dataset.prio){
+    const v=el.dataset.prio,i=S.priorities.indexOf(v);
+    if(i>=0)S.priorities.splice(i,1);else if(S.priorities.length<3)S.priorities.push(v);else{toast("Three priorities max. Remove one first.");return}
+    save();render();return;
+  }
+  if(el.dataset.tpl){const t=TEMPLATES.find(x=>x.n===el.dataset.tpl);S.usecases.push({id:S.seq++,name:t.n,pillar:t.p,value:t.v,feas:t.f});save();render();toast("Added to the map");return}
+  if(el.dataset.del){S.usecases=S.usecases.filter(u=>u.id!=el.dataset.del);save();render();return}
+  const a=el.dataset.act;
+  if(a==="adduc"){const n=$("#uc-name").value.trim();if(!n){$("#uc-name").focus();toast("Give the use case a name");return}S.usecases.push({id:S.seq++,name:n,pillar:$("#uc-p").value,value:+$("#uc-v").value,feas:+$("#uc-f").value});save();render();$("#uc-name").focus();return}
+  if(a==="new"){
+    const host=el.closest(".banner")||el.closest(".actions");
+    if(document.getElementById("cf"))return;
+    host.insertAdjacentHTML("afterend",'<div class="confirm" id="cf" style="margin-bottom:12px"><span>Clear everything and start a blank discovery?'+(S.sample?"":" Copy the session data first if you want to keep it.")+'</span><button class="btn sm danger" data-act="reset">Clear and start</button><button class="btn sm" data-act="cancel">Cancel</button></div>');return;
+  }
+  if(a==="cancel"){const c=document.getElementById("cf");if(c)c.remove();return}
+  if(a==="reset"){S=blank();save();render();toast("Blank discovery started");return}
+  if(a==="copymd"){copyText(markdown(),"Readout");return}
+  if(a==="copyjson"){copyText(JSON.stringify(S),"Session data");return}
+  if(a==="showimport"){$("#io").innerHTML='<div class="stack"><div class="field"><label for="io-paste">Paste session data</label><textarea id="io-paste" placeholder="Paste the text from “Copy session data”"></textarea></div><div class="actions"><button class="btn pri" data-act="doimport">Load session</button><label class="btn" for="io-file" style="display:inline-block">Choose a .json file</label><input type="file" id="io-file" accept=".json,application/json,text/plain" hidden></div></div>';return}
+  if(a==="doimport"){if(!loadSession($("#io-paste").value))toast("That text isn't a saved discovery session");return}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="uc-name"){e.preventDefault();document.querySelector('[data-act="adduc"]').click()}});
+
+render();
+})();
+</script>
+
+</body>
+</html>
