@@ -2,7 +2,7 @@
 
 Single-page workbenches for running customer discovery workshops in the browser. Each one walks a consultant through engagement setup, business outcomes, a maturity assessment, a use-case map and a generated readout.
 
-**Live demo:** __PAGES_URL__
+**Live demo:** https://vishal14101986-git.github.io/consulting-discovery-workbench/
 
 | Workbench | Path | Areas |
 |---|---|---|
